@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'splash_screen.dart'; 
-import 'package:uas_cookedex/home/home.dart';// Import SplashScreen untuk navigasi
+import 'splash_screen.dart';
+import 'e-mail_login_screen.dart'; // Import the Email Login Screen
 
 class AuthScreen extends StatelessWidget {
   const AuthScreen({super.key});
@@ -14,14 +14,14 @@ class AuthScreen extends StatelessWidget {
           // Background Image
           Positioned.fill(
             child: Image.asset(
-              'assets/images/auth1.jpg', // Pastikan path gambar sesuai
+              'assets/images/auth1.jpg', // Ensure the path to the image is correct
               fit: BoxFit.cover,
             ),
           ),
-          // Tombol Back di atas kiri
+          // Back Button with Orange Circle
           Positioned(
-            top: 40, // Jarak dari atas
-            left: 16, // Jarak dari kiri
+            top: 40,
+            left: 16,
             child: ElevatedButton(
               onPressed: () {
                 Navigator.pushReplacement(
@@ -31,8 +31,8 @@ class AuthScreen extends StatelessWidget {
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.orangeAccent,
-                shape: CircleBorder(
-                ),
+                shape: const CircleBorder(),
+                padding: const EdgeInsets.all(8),
               ),
               child: const Icon(Icons.arrow_back, color: Colors.white),
             ),
@@ -69,29 +69,44 @@ class AuthScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 32),
-                  // Phone Number Input
+                  // Email, Username, Password Fields
                   TextField(
-                    keyboardType: TextInputType.phone,
+                    keyboardType: TextInputType.emailAddress,
                     decoration: InputDecoration(
-                      prefixIcon: const Icon(Icons.flag),
-                      hintText: 'Phone Number',
+                      hintText: 'E-mail',
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
                   ),
                   const SizedBox(height: 16),
-                    // Send OTP Button
+                  TextField(
+                    keyboardType: TextInputType.text,
+                    decoration: InputDecoration(
+                      hintText: 'Username',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    obscureText: true,
+                    decoration: InputDecoration(
+                      hintText: 'Password',
+                      suffixIcon: Icon(Icons.visibility),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  // Register Now Button
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: () {
-                        // Navigasi ke halaman HomePage
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const HomePage()),
-                        );
+                        // Handle Register
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.orangeAccent,
@@ -100,7 +115,7 @@ class AuthScreen extends StatelessWidget {
                         ),
                       ),
                       child: const Text(
-                        'Send OTP',
+                        'Register Now',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
@@ -136,58 +151,59 @@ class AuthScreen extends StatelessWidget {
                       ),
                     ],
                   ),
+                  const SizedBox(height: 8),
+                  // "Continue with" text
+                  Text(
+                    'Continue with',
+                    style: GoogleFonts.poppins(
+                      fontSize: 14,
+                      color: Colors.grey,
+                    ),
+                  ),
                   const SizedBox(height: 16),
                   // Social Login Options
-                  Column(
+                  Row(
                     children: [
-                      ElevatedButton.icon(
-                        onPressed: () {},
-                        icon: const Icon(Icons.apple),
-                        label: const Text('Continue with Apple'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.black,
-                          foregroundColor: Colors.white,
-                          minimumSize: const Size(double.infinity, 48),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: () {
+                            // Navigate to Email Login Screen
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      const EmailLoginScreen()),
+                            );
+                          },
+                          icon: const Icon(Icons.mail),
+                          label: const Text('E-mail'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red,
+                            foregroundColor: Colors.white,
+                            minimumSize: const Size(double.infinity, 48),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                           ),
                         ),
                       ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: ElevatedButton.icon(
-                              onPressed: () {},
-                              icon: const Icon(Icons.facebook),
-                              label: const Text('Facebook'),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.blue,
-                                foregroundColor: Colors.white,
-                                minimumSize: const Size(double.infinity, 48),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: () {
+                            // Handle Google Login
+                          },
+                          icon: const Icon(Icons.g_translate),
+                          label: const Text('Google'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue,
+                            foregroundColor: Colors.white,
+                            minimumSize: const Size(double.infinity, 48),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
                             ),
                           ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: ElevatedButton.icon(
-                              onPressed: () {},
-                              icon: const Icon(Icons.mail),
-                              label: const Text('Google'),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.red,
-                                foregroundColor: Colors.white,
-                                minimumSize: const Size(double.infinity, 48),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
                     ],
                   ),
