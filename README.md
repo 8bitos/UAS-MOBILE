@@ -1,5 +1,14 @@
 # 📱 Aplikasi Resep Masak
 
+## 👥 Anggota Kelompok 3
+
+1. **I Gusti Nyoman Sapta Wiguna** (2215051041)  
+2. **Malika Pradnya**  
+3. **Ame**  
+4. **Rezzy**  
+5. **Fahril**  
+
+
 Proyek ini merupakan hasil tugas akhir mata kuliah **Mobile & Cloud**. Aplikasi ini dirancang untuk memudahkan pengguna mencari, menyimpan, dan mengikuti resep masakan dengan antarmuka yang sederhana dan user-friendly.
 
 ---
