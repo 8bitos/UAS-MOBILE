@@ -8,7 +8,34 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  int _selectedIndex = 0; // Untuk menentukan tab aktif
+  int _selectedIndex = 0; // For tracking the selected tab
+  Widget _buildCategoryItem(String imagePath, String title) {
+  return Padding(
+    padding: const EdgeInsets.only(right: 8.0),
+    child: Column(
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: Image.asset(
+            imagePath,
+            width: 80,
+            height: 80,
+            fit: BoxFit.cover,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
 
   void _onItemTapped(int index) {
     setState(() {
@@ -52,17 +79,20 @@ class _HomePageState extends State<HomePage> {
       },
     ];
 
-    final List<Map<String, String>> categories = [
-      {"image": "assets/images/category1.jpg", "title": "Seasonal"},
-      {"image": "assets/images/category2.jpg", "title": "Cakes"},
-      {"image": "assets/images/category3.jpg", "title": "Everyday"},
-      {"image": "assets/images/category4.jpg", "title": "Drinks"},
-    ];
+    final List<String> categories = ["Dessert", "Main Course", "Snack", "Drinks"];
 
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
+        leading: IconButton(
+          icon: const CircleAvatar(
+            backgroundImage: AssetImage('assets/images/profile.png'), // Profile image
+          ),
+          onPressed: () {
+            Navigator.pushNamed(context, '/account'); // Replace with your route
+          },
+        ),
         title: const Text(
           "Hi Nara",
           style: TextStyle(
@@ -74,7 +104,9 @@ class _HomePageState extends State<HomePage> {
         actions: [
           IconButton(
             icon: const Icon(Icons.notifications_outlined, color: Colors.black),
-            onPressed: () {},
+            onPressed: () {
+              Navigator.pushNamed(context, '/notification'); // Replace with your route
+            },
           ),
         ],
         bottom: const PreferredSize(
@@ -139,8 +171,7 @@ class _HomePageState extends State<HomePage> {
                                 Padding(
                                   padding: const EdgeInsets.all(16.0),
                                   child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         cookbook["title"]!,
@@ -159,8 +190,7 @@ class _HomePageState extends State<HomePage> {
                                       ),
                                       const SizedBox(height: 16),
                                       Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                         children: [
                                           Text(
                                             "${cookbook["likes"]} Likes",
@@ -204,9 +234,9 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  Text(
+                  const Text(
                     "Get lots of recipe inspiration from the community",
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 14,
                       color: Colors.grey,
                     ),
@@ -266,46 +296,79 @@ class _HomePageState extends State<HomePage> {
                 ],
               ),
             ),
+
+
+            // Category Section
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Category",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        _buildCategoryItem('assets/images/category1.jpg', 'Seasonal'),
+                        _buildCategoryItem('assets/images/category2.jpg', 'Cakes'),
+                        _buildCategoryItem('assets/images/category3.jpg', 'Everyday'),
+                        _buildCategoryItem('assets/images/category4.jpg', 'Drinks'),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // Tambahkan fungsi untuk tombol
+          // Add functionality for the button
         },
         backgroundColor: Colors.orangeAccent,
         child: const Icon(Icons.add, color: Colors.white),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      bottomNavigationBar: BottomAppBar(
-        shape: const CircularNotchedRectangle(),
-        notchMargin: 8.0,
-        child: BottomNavigationBar(
-          backgroundColor: Colors.orangeAccent,
-          selectedItemColor: Colors.white,
-          unselectedItemColor: Colors.black,
-          currentIndex: _selectedIndex,
-          onTap: _onItemTapped,
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+        bottomNavigationBar: BottomNavigationBar(
+          type: BottomNavigationBarType.fixed,
+          backgroundColor: Colors.white, // Matches the app bar background
+          selectedItemColor: Colors.orangeAccent, // Icon color when selected
+          unselectedItemColor: Colors.grey, // Icon color when not selected
+          showSelectedLabels: false, // Remove text labels
+          showUnselectedLabels: false, // Remove text labels
+          currentIndex: _selectedIndex, // Tracks the current tab
+          onTap: _onItemTapped, // Handles tab switching
           items: const [
             BottomNavigationBarItem(
-              icon: Icon(Icons.home),
-              label: "Home",
+              icon: Icon(Icons.home, size: 28), // Enlarge icon
+              label: "", // No label
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.search),
-              label: "Search",
+              icon: Icon(Icons.search, size: 28), // Enlarge icon
+              label: "", // No label
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.shopping_cart),
-              label: "Cart",
+              icon: SizedBox.shrink(), // Placeholder for the FAB
+              label: "", // No label
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.calendar_today),
-              label: "Calendar",
+              icon: Icon(Icons.shopping_cart, size: 28), // Enlarge icon
+              label: "", // No label
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.calendar_today, size: 28), // Enlarge icon
+              label: "", // No label
             ),
           ],
         ),
-      ),
-    );
+      );
+    }
   }
-}
