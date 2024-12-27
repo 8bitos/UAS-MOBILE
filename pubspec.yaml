@@ -72,7 +72,11 @@ flutter:
     - assets/images/cookbook2.jpg
     - assets/images/recipe1.jpg
     - assets/images/recipe2.jpg
+    - assets/images/recipe3.jpg
     - assets/images/profile.png
+    - assets/images/profile_cover.png
+    - assets/images/recipe_user1.jpg
+    - assets/images/recipe_user2.jpg
 
   # To add assets to your application, add an assets section, like this:
   # assets:

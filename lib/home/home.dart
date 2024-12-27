@@ -8,34 +8,34 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  int _selectedIndex = 0; // For tracking the selected tab
-  Widget _buildCategoryItem(String imagePath, String title) {
-  return Padding(
-    padding: const EdgeInsets.only(right: 8.0),
-    child: Column(
-      children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(12),
-          child: Image.asset(
-            imagePath,
-            width: 80,
-            height: 80,
-            fit: BoxFit.cover,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          title,
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      ],
-    ),
-  );
-}
+  int _selectedIndex = 0;
 
+  Widget _buildCategoryItem(String imagePath, String title) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 8.0),
+      child: Column(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: Image.asset(
+              imagePath,
+              width: 80,
+              height: 80,
+              fit: BoxFit.cover,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -77,57 +77,80 @@ class _HomePageState extends State<HomePage> {
         "likes": "150",
         "reviews": "103 Reviews"
       },
+      {
+        "image": "assets/images/recipe3.jpg",
+        "title": "Penne ala Bolognese",
+        "author": "Gayus Tri Pinjungwati",
+        "likes": "124",
+        "reviews": "43 Reviews"
+      },
     ];
 
-    final List<String> categories = ["Dessert", "Main Course", "Snack", "Drinks"];
-
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const CircleAvatar(
-            backgroundImage: AssetImage('assets/images/profile.png'), // Profile image
-          ),
-          onPressed: () {
-            Navigator.pushNamed(context, '/account'); // Replace with your route
-          },
+      appBar: PreferredSize(
+      preferredSize: const Size.fromHeight(100), 
+      child: Container(
+        decoration: const BoxDecoration(
+          color: Colors.white, 
         ),
-        title: const Text(
-          "Hi Nara",
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_outlined, color: Colors.black),
-            onPressed: () {
-              Navigator.pushNamed(context, '/notification'); // Replace with your route
-            },
-          ),
-        ],
-        bottom: const PreferredSize(
-          preferredSize: Size.fromHeight(24.0),
+        child: SafeArea(
           child: Padding(
-            padding: EdgeInsets.only(bottom: 8.0),
-            child: Text(
-              "What are you cooking today?",
-              style: TextStyle(
-                color: Colors.grey,
-                fontSize: 16,
-              ),
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    Navigator.pushNamed(context, '/account');
+                  },
+                  child: const CircleAvatar(
+                    backgroundImage: AssetImage('assets/images/profile.png'),
+                    radius: 25,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center, // Sejajarkan teks
+                  children: const [
+                    Text(
+                      "Hi Nara",
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                    Text(
+                      "What are you cooking today?",
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ],
+                ),
+                const Spacer(),
+                IconButton(
+                  icon: const Icon(Icons.notifications_outlined, color: Colors.black),
+                  iconSize: 28,
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/notification');
+                  },
+                ),
+              ],
             ),
           ),
         ),
       ),
+    ),
+
+      backgroundColor: Colors.white,
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // PageView for Cookbooks
+            // Cookbooks Section
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
@@ -138,18 +161,19 @@ class _HomePageState extends State<HomePage> {
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
+                      color: Colors.black,
                     ),
                   ),
                   const SizedBox(height: 8),
                   SizedBox(
                     height: 300,
                     child: PageView.builder(
-                      controller: PageController(viewportFraction: 0.8),
+                      controller: PageController(viewportFraction: 1.0),
                       itemCount: cookbooks.length,
                       itemBuilder: (context, index) {
                         final cookbook = cookbooks[index];
                         return Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          padding: const EdgeInsets.symmetric(horizontal: 0.0),
                           child: Card(
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(16),
@@ -165,6 +189,7 @@ class _HomePageState extends State<HomePage> {
                                     child: Image.asset(
                                       cookbook["image"]!,
                                       fit: BoxFit.cover,
+                                      width: double.infinity,
                                     ),
                                   ),
                                 ),
@@ -178,6 +203,7 @@ class _HomePageState extends State<HomePage> {
                                         style: const TextStyle(
                                           fontWeight: FontWeight.bold,
                                           fontSize: 16,
+                                          color: Colors.black,
                                         ),
                                       ),
                                       const SizedBox(height: 8),
@@ -196,12 +222,14 @@ class _HomePageState extends State<HomePage> {
                                             "${cookbook["likes"]} Likes",
                                             style: const TextStyle(
                                               fontSize: 14,
+                                              color: Colors.black,
                                             ),
                                           ),
                                           Text(
                                             "${cookbook["recipes"]} Recipes",
                                             style: const TextStyle(
                                               fontSize: 14,
+                                              color: Colors.black,
                                             ),
                                           ),
                                         ],
@@ -219,10 +247,10 @@ class _HomePageState extends State<HomePage> {
                 ],
               ),
             ),
-
+            
             // Community Recipes Section
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              padding: const EdgeInsets.only(top: 43.0, left: 16.0, right: 16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -292,15 +320,28 @@ class _HomePageState extends State<HomePage> {
                         ],
                       ),
                     );
-                  }),
+                  }).toList(),
+                  const SizedBox(height: 8),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.pushNamed(context, '/community-recipes');
+                    },
+                    child: const Text(
+                      "See All Recipes by Community",
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.orangeAccent,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
-
-
+            
             // Category Section
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              padding: const EdgeInsets.only(top: 43.0, left: 24.0, right: 24.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -309,18 +350,22 @@ class _HomePageState extends State<HomePage> {
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
+                      color: Colors.black,
                     ),
                   ),
                   const SizedBox(height: 8),
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: [
-                        _buildCategoryItem('assets/images/category1.jpg', 'Seasonal'),
-                        _buildCategoryItem('assets/images/category2.jpg', 'Cakes'),
-                        _buildCategoryItem('assets/images/category3.jpg', 'Everyday'),
-                        _buildCategoryItem('assets/images/category4.jpg', 'Drinks'),
-                      ],
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 80.0),
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: [
+                          _buildCategoryItem('assets/images/category1.jpg', 'Seasonal'),
+                          _buildCategoryItem('assets/images/category2.jpg', 'Cakes'),
+                          _buildCategoryItem('assets/images/category3.jpg', 'Everyday'),
+                          _buildCategoryItem('assets/images/category4.jpg', 'Drinks'),
+                        ],
+                      ),
                     ),
                   ),
                 ],
@@ -336,39 +381,35 @@ class _HomePageState extends State<HomePage> {
         backgroundColor: Colors.orangeAccent,
         child: const Icon(Icons.add, color: Colors.white),
       ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-        bottomNavigationBar: BottomNavigationBar(
-          type: BottomNavigationBarType.fixed,
-          backgroundColor: Colors.white, // Matches the app bar background
-          selectedItemColor: Colors.orangeAccent, // Icon color when selected
-          unselectedItemColor: Colors.grey, // Icon color when not selected
-          showSelectedLabels: false, // Remove text labels
-          showUnselectedLabels: false, // Remove text labels
-          currentIndex: _selectedIndex, // Tracks the current tab
-          onTap: _onItemTapped, // Handles tab switching
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home, size: 28), // Enlarge icon
-              label: "", // No label
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.search, size: 28), // Enlarge icon
-              label: "", // No label
-            ),
-            BottomNavigationBarItem(
-              icon: SizedBox.shrink(), // Placeholder for the FAB
-              label: "", // No label
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.shopping_cart, size: 28), // Enlarge icon
-              label: "", // No label
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.calendar_today, size: 28), // Enlarge icon
-              label: "", // No label
-            ),
-          ],
-        ),
-      );
-    }
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
+        backgroundColor: Colors.white,
+        selectedItemColor: Colors.orangeAccent,
+        unselectedItemColor: Colors.grey,
+        showSelectedLabels: false,
+        showUnselectedLabels: false,
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home, size: 28),
+            label: "",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.favorite_outline, size: 28),
+            label: "",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.search, size: 28),
+            label: "",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.account_circle_outlined, size: 28),
+            label: "",
+          ),
+        ],
+      ),
+    );
   }
+}

@@ -11,8 +11,29 @@ class EmailLoginScreen extends StatefulWidget {
 }
 
 class _EmailLoginScreenState extends State<EmailLoginScreen> {
-  bool isForgotPasswordHovered = false;
-  bool isRegisterHereHovered = false;
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  bool _isForgotPasswordHovered = false;
+  bool _isRegisterHereHovered = false;
+
+  void _login() {
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+
+    if (email.isEmpty || password.isEmpty) {
+      // Show error message if fields are empty
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please fill in all fields'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    // Navigate to the home screen (replace '/home' with your home route)
+    Navigator.pushReplacementNamed(context, '/home');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -60,6 +81,7 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
                   const SizedBox(height: 32),
                   // E-mail Field
                   TextField(
+                    controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
                     decoration: InputDecoration(
                       hintText: 'E-mail address',
@@ -70,7 +92,10 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
                   ),
                   const SizedBox(height: 16),
                   // Password Field
-                  const PasswordField(labelText: 'Password'),
+                  PasswordField(
+                    labelText: 'Password',
+                    controller: _passwordController,
+                  ),
                   const SizedBox(height: 16),
                   // Forgot Password Link
                   Align(
@@ -86,21 +111,21 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
                       },
                       onTapDown: (_) {
                         setState(() {
-                          isForgotPasswordHovered = true;
+                          _isForgotPasswordHovered = true;
                         });
                       },
                       onTapCancel: () {
                         setState(() {
-                          isForgotPasswordHovered = false;
+                          _isForgotPasswordHovered = false;
                         });
                       },
                       child: Text(
                         'forgot password',
                         style: TextStyle(
-                          color: isForgotPasswordHovered
+                          color: _isForgotPasswordHovered
                               ? Colors.orangeAccent
                               : Colors.grey,
-                          fontWeight: isForgotPasswordHovered
+                          fontWeight: _isForgotPasswordHovered
                               ? FontWeight.bold
                               : FontWeight.normal,
                         ),
@@ -112,9 +137,7 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: () {
-                        // Handle Login
-                      },
+                      onPressed: _login,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.orangeAccent,
                         shape: RoundedRectangleBorder(
@@ -132,33 +155,32 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
                   ),
                   const SizedBox(height: 16),
                   // Register Redirect
-                 GestureDetector(
+                  GestureDetector(
                     onTap: () {
-                      // Replace current screen with the Register screen
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const AuthScreen(), // Replace with your registration screen
+                          builder: (context) => const AuthScreen(),
                         ),
                       );
                     },
                     onTapDown: (_) {
                       setState(() {
-                        isRegisterHereHovered = true;
+                        _isRegisterHereHovered = true;
                       });
                     },
                     onTapCancel: () {
                       setState(() {
-                        isRegisterHereHovered = false;
+                        _isRegisterHereHovered = false;
                       });
                     },
                     child: Text(
                       "Haven't made an account? Register here.",
                       style: TextStyle(
-                        color: isRegisterHereHovered
+                        color: _isRegisterHereHovered
                             ? Colors.orangeAccent
                             : Colors.grey,
-                        fontWeight: isRegisterHereHovered
+                        fontWeight: _isRegisterHereHovered
                             ? FontWeight.bold
                             : FontWeight.normal,
                       ),
@@ -175,9 +197,10 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
 }
 
 class PasswordField extends StatefulWidget {
-  const PasswordField({Key? key, required this.labelText}) : super(key: key);
+  const PasswordField({Key? key, required this.labelText, required this.controller}) : super(key: key);
 
   final String labelText;
+  final TextEditingController controller;
 
   @override
   State<PasswordField> createState() => _PasswordFieldState();
@@ -189,6 +212,7 @@ class _PasswordFieldState extends State<PasswordField> {
   @override
   Widget build(BuildContext context) {
     return TextField(
+      controller: widget.controller,
       obscureText: _isObscured,
       decoration: InputDecoration(
         labelText: widget.labelText,
