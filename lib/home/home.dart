@@ -1,4 +1,165 @@
 import 'package:flutter/material.dart';
+import 'package:uas_cookedex/default_recipe.dart';
+
+class RecipeSearchDelegate extends SearchDelegate {
+  final List<String> recentSearches;
+  final List<Map<String, String>> lastSeenRecipes;
+
+  RecipeSearchDelegate({
+    required this.recentSearches,
+    required this.lastSeenRecipes,
+  });
+
+  // Leading icon in the AppBar
+  @override
+  Widget? buildLeading(BuildContext context) {
+    return IconButton(
+      icon: const Icon(Icons.arrow_back, color: Colors.black),
+      onPressed: () {
+        close(context, null); // Close the search delegate
+      },
+    );
+  }
+
+  // Action icons in the AppBar
+  @override
+  List<Widget>? buildActions(BuildContext context) {
+    return [
+      IconButton(
+        icon: const Icon(Icons.clear, color: Colors.black),
+        onPressed: () {
+          query = ''; // Clear the search query
+          showSuggestions(context); // Show suggestions after clearing
+        },
+      ),
+    ];
+  }
+
+  // Suggestions view (when there's no search query or the query is cleared)
+  @override
+  Widget buildSuggestions(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Recent Searches Section
+            const Text(
+              "Recent Search",
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 16),
+            if (recentSearches.isEmpty)
+              const Text(
+                "No recent searches yet.",
+                style: TextStyle(color: Colors.grey),
+              )
+            else
+              Column(
+                children: recentSearches.map((search) {
+                  return ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(
+                      search,
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () {
+                        recentSearches.remove(search); // Remove recent search
+                        showSuggestions(context); // Refresh suggestions
+                      },
+                    ),
+                    onTap: () {
+                      query = search; // Use the tapped search term as the query
+                      showResults(context); // Show results for this query
+                    },
+                  );
+                }).toList(),
+              ),
+            const SizedBox(height: 24),
+
+            // Last Seen Recipes Section
+            const Text(
+              "Last Seen",
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Column(
+              children: lastSeenRecipes.map((recipe) {
+                return ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.asset(
+                      recipe["image"]!,
+                      width: 60,
+                      height: 60,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  title: Text(
+                    recipe["title"]!,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  subtitle: Row(
+                    children: [
+                      Text(recipe["time"]!),
+                      const SizedBox(width: 8),
+                      const Icon(Icons.circle, size: 6, color: Colors.grey),
+                      const SizedBox(width: 8),
+                      Text(recipe["difficulty"]!),
+                    ],
+                  ),
+                  onTap: () {
+                    close(context, null); // Close search delegate
+                    // Navigate to recipe detail page
+                    Navigator.pushNamed(context, '/recipe-detail', arguments: recipe);
+                  },
+                );
+              }).toList(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Search Results (When User Presses Search)
+  @override
+  Widget buildResults(BuildContext context) {
+    final results = recentSearches
+        .where((recipe) => recipe.toLowerCase().contains(query.toLowerCase()))
+        .toList();
+
+    // Add the query to recent searches if it's not already present
+    if (query.isNotEmpty && !recentSearches.contains(query)) {
+      recentSearches.insert(0, query); // Add to the top of the list
+    }
+
+    return ListView.builder(
+      itemCount: results.length,
+      itemBuilder: (context, index) {
+        return ListTile(
+          title: Text(results[index]),
+          onTap: () {
+            close(context, null); // Close search delegate
+            // Navigate to recipe detail page
+            Navigator.pushNamed(context, '/recipe-detail', arguments: results[index]);
+          },
+        );
+      },
+    );
+  }
+}
+
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -9,6 +170,47 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
+
+  // Define recent searches and last seen recipes
+  final List<String> _recentSearches = ["Sayur", "Ayam", "Gulai"];
+  final List<Map<String, String>> _lastSeenRecipes = [
+    {
+      "image": "assets/images/recipe1.jpg",
+      "title": "Resep Ayam Kuah Santan Pedas Lezat",
+      "time": "40 min",
+      "difficulty": "Easy",
+    },
+    {
+      "image": "assets/images/recipe2.jpg",
+      "title": "Sup Makaroni Daging Ayam Kampung",
+      "time": "45 min",
+      "difficulty": "Medium",
+    },
+    {
+      "image": "assets/images/recipe3.jpg",
+      "title": "Resep Ayam Geprek Jogja",
+      "time": "30 min",
+      "difficulty": "Easy",
+    },
+  ];
+
+  // Function to handle bottom navigation bar taps
+  void _onItemTapped(int index) {
+    if (index == 1) {
+      // If Search is tapped, show the search overlay
+      showSearch(
+        context: context,
+        delegate: RecipeSearchDelegate(
+          recentSearches: _recentSearches, // Pass recent searches
+          lastSeenRecipes: _lastSeenRecipes, // Pass last seen recipes
+        ),
+      );
+    } else {
+      setState(() {
+        _selectedIndex = index;
+      });
+    }
+  }
 
   Widget _buildCategoryItem(String imagePath, String title) {
     return Padding(
@@ -37,11 +239,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
+  
 
   @override
   Widget build(BuildContext context) {
@@ -151,102 +349,119 @@ class _HomePageState extends State<HomePage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Cookbooks Section
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    "Cookbooks",
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
+           SizedBox(
+  height: 300,
+  child: PageView.builder(
+    controller: PageController(viewportFraction: 0.9), // Adjust viewport fraction for slide effect
+    itemCount: cookbooks.length,
+    itemBuilder: (context, index) {
+      final cookbook = cookbooks[index];
+      return GestureDetector(
+        onTap: () {
+          Navigator.pushNamed(
+            context,
+            '/cookbook-detail',
+            arguments: {
+              'title': cookbook["title"]!,
+              'recipes': [
+                // Add sample recipes for each cookbook
+                {
+                  "image": "assets/images/recipe1.jpg",
+                  "title": "Ayam Kecap Manis",
+                  "time": "40 min",
+                  "difficulty": "Easy",
+                },
+                {
+                  "image": "assets/images/recipe2.jpg",
+                  "title": "Buncis Kuah Santan",
+                  "time": "30 min",
+                  "difficulty": "Medium",
+                },
+                {
+                  "image": "assets/images/recipe3.jpg",
+                  "title": "Cumi Saus Telur Asin",
+                  "time": "50 min",
+                  "difficulty": "Hard",
+                },
+              ],
+            },
+          );
+        },
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          child: Card(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(
+                  child: ClipRRect(
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(16),
+                    ),
+                    child: Image.asset(
+                      cookbook["image"]!,
+                      fit: BoxFit.cover,
+                      width: double.infinity,
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  SizedBox(
-                    height: 300,
-                    child: PageView.builder(
-                      controller: PageController(viewportFraction: 1.0),
-                      itemCount: cookbooks.length,
-                      itemBuilder: (context, index) {
-                        final cookbook = cookbooks[index];
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 0.0),
-                          child: Card(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                Expanded(
-                                  child: ClipRRect(
-                                    borderRadius: const BorderRadius.vertical(
-                                      top: Radius.circular(16),
-                                    ),
-                                    child: Image.asset(
-                                      cookbook["image"]!,
-                                      fit: BoxFit.cover,
-                                      width: double.infinity,
-                                    ),
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.all(16.0),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        cookbook["title"]!,
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 16,
-                                          color: Colors.black,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 8),
-                                      Text(
-                                        cookbook["description"]!,
-                                        style: const TextStyle(
-                                          fontSize: 14,
-                                          color: Colors.grey,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 16),
-                                      Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Text(
-                                            "${cookbook["likes"]} Likes",
-                                            style: const TextStyle(
-                                              fontSize: 14,
-                                              color: Colors.black,
-                                            ),
-                                          ),
-                                          Text(
-                                            "${cookbook["recipes"]} Recipes",
-                                            style: const TextStyle(
-                                              fontSize: 14,
-                                              color: Colors.black,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        cookbook["title"]!,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                          color: Colors.black,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        cookbook["description"]!,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            "${cookbook["likes"]} Likes",
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: Colors.black,
                             ),
                           ),
-                        );
-                      },
-                    ),
+                          Text(
+                            "${cookbook["recipes"]} Recipes",
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
+          ),
+        ),
+      );
+    },
+  ),
+),
+
+
             
             // Community Recipes Section
             Padding(
@@ -270,54 +485,69 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  ...communityRecipes.map((recipe) {
-                    return Card(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Image.asset(
-                            recipe["image"]!,
-                            fit: BoxFit.cover,
-                            width: double.infinity,
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  recipe["title"]!,
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                Row(
-                                  children: [
-                                    Text(
-                                      "by ${recipe["author"]}",
-                                      style: const TextStyle(
-                                        fontSize: 14,
-                                        color: Colors.grey,
-                                      ),
-                                    ),
-                                    const Spacer(),
-                                    Text(
-                                      "${recipe["likes"]} Likes",
-                                      style: const TextStyle(
-                                        fontSize: 14,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
+                  ...communityRecipes.map((communityRecipe) {
+                    // Find the corresponding recipe in the full recipes list by matching titles
+                    final matchingRecipe = recipes.firstWhere(
+                      (recipe) => recipe['title'] == communityRecipe['title'], // Match by title
+                      orElse: () => {}, // Fallback in case no match is found
+                    );
+
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.pushNamed(
+                          context,
+                          '/recipe-detail',
+                          arguments: matchingRecipe, // Pass the matched recipe
+                        );
+                      },
+                      child: Card(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Image.asset(
+                              communityRecipe["image"]!,
+                              fit: BoxFit.cover,
+                              width: double.infinity,
                             ),
-                          ),
-                        ],
+                            Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    communityRecipe["title"]!,
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Row(
+                                    children: [
+                                      Text(
+                                        "by ${communityRecipe["author"]}",
+                                        style: const TextStyle(
+                                          fontSize: 14,
+                                          color: Colors.grey,
+                                        ),
+                                      ),
+                                      const Spacer(),
+                                      Text(
+                                        "${communityRecipe["likes"]} Likes",
+                                        style: const TextStyle(
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     );
                   }).toList(),
@@ -397,15 +627,15 @@ class _HomePageState extends State<HomePage> {
             label: "",
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.favorite_outline, size: 28),
-            label: "",
-          ),
-          BottomNavigationBarItem(
             icon: Icon(Icons.search, size: 28),
             label: "",
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.account_circle_outlined, size: 28),
+            icon: Icon(Icons.shopping_cart, size: 28),
+            label: "",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.calendar_month, size: 28),
             label: "",
           ),
         ],
