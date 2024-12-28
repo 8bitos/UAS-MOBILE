@@ -32,6 +32,7 @@ dependencies:
     sdk: flutter
   google_fonts: ^5.0.0
   carousel_slider: ^4.2.0
+  image_picker: ^0.8.5
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -40,6 +41,7 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+    
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -77,6 +79,9 @@ flutter:
     - assets/images/profile_cover.png
     - assets/images/recipe_user1.jpg
     - assets/images/recipe_user2.jpg
+    - assets/images/cookbook_default.jpg
+    - assets/images/default_recipe.jpg
+    
 
   # To add assets to your application, add an assets section, like this:
   # assets:

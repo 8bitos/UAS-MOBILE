@@ -1,11 +1,66 @@
 import 'package:flutter/material.dart';
 import 'package:uas_cookedex/default_recipe.dart'; // Import the default recipes
+import 'dart:io';
 
-class AccountPage extends StatelessWidget {
+class AccountPage extends StatefulWidget {
   const AccountPage({Key? key}) : super(key: key);
 
   @override
+  _AccountPageState createState() => _AccountPageState();
+}
+
+class _AccountPageState extends State<AccountPage> {
+  // Profile Data (Initial State)
+  String name = "Nararaya Kirana";
+  String bio = "Rajin menabung dan suka memasak";
+  String profileImage = "assets/images/profile.png";
+  String coverImage = "assets/images/profile_cover.png";
+
+  void _deleteRecipe(BuildContext context, Map<String, dynamic> recipe) {
+    setState(() {
+      recipes.removeWhere((r) => r['title'] == recipe['title']); // Match by title
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('${recipe["title"]} has been deleted.'),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  void _editProfile() {
+    Navigator.pushNamed(
+      context,
+      '/edit-profile',
+      arguments: {
+        'name': name,
+        'bio': bio,
+        'profileImage': profileImage,
+        'coverImage': coverImage,
+      },
+    ).then((updatedProfile) {
+      if (updatedProfile != null && updatedProfile is Map<String, dynamic>) {
+        setState(() {
+          // Update the profile details dynamically
+          name = updatedProfile['name'] ?? name;
+          bio = updatedProfile['bio'] ?? bio;
+          profileImage = updatedProfile['profileImage'] ?? profileImage;
+          coverImage = updatedProfile['coverImage'] ?? coverImage;
+        });
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    // Filter recipes to only include user-added ones
+    final userAddedRecipes = recipes
+        .where((recipe) =>
+            recipe["image"] == "assets/images/default_recipe.jpg" || // Default for user-added recipes
+            !recipe["image"].contains("assets/images")) // Images not part of pre-existing assets
+        .toList();
+
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
@@ -17,7 +72,7 @@ class AccountPage extends StatelessWidget {
           },
         ),
         title: const Text(
-          "Community",
+          "Account",
           style: TextStyle(
             color: Colors.black,
             fontSize: 20,
@@ -29,7 +84,7 @@ class AccountPage extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.settings, color: Colors.black),
             onPressed: () {
-              Navigator.pushNamed(context, '/acc-setting');
+              Navigator.pushNamed(context, '/acc-setting'); // Go to Account Settings
             },
           ),
         ],
@@ -42,20 +97,31 @@ class AccountPage extends StatelessWidget {
             clipBehavior: Clip.none,
             alignment: Alignment.center,
             children: [
-              Image.asset(
-                'assets/images/profile_cover.png',
+              Container(
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    image: coverImage.contains('assets/images')
+                        ? AssetImage(coverImage) as ImageProvider
+                        : FileImage(File(coverImage)), // Use FileImage for local file paths
+                    fit: BoxFit.cover,
+                  ),
+                ),
                 height: 200,
                 width: double.infinity,
-                fit: BoxFit.cover,
               ),
               Positioned(
                 bottom: -50,
-                child: CircleAvatar(
-                  radius: 55,
-                  backgroundColor: Colors.white,
+                child: GestureDetector(
+                  onTap: _editProfile, // Open edit profile
                   child: CircleAvatar(
-                    radius: 50,
-                    backgroundImage: AssetImage('assets/images/profile.png'),
+                    radius: 55,
+                    backgroundColor: Colors.white,
+                    child: CircleAvatar(
+                      radius: 50,
+                      backgroundImage: profileImage.contains('assets/images')
+                          ? AssetImage(profileImage) as ImageProvider
+                          : FileImage(File(profileImage)), // Use FileImage for local file paths
+                    ),
                   ),
                 ),
               ),
@@ -73,21 +139,21 @@ class AccountPage extends StatelessWidget {
               ),
             ),
             child: Column(
-              children: const [
+              children: [
                 Text(
-                  "Nararaya Kirana",
-                  style: TextStyle(
+                  name, // Display updated name
+                  style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                SizedBox(height: 4),
+                const SizedBox(height: 4),
                 Text(
-                  "Rajin menabung dan suka memasak",
-                  style: TextStyle(fontSize: 14, color: Colors.grey),
+                  bio, // Display updated bio
+                  style: const TextStyle(fontSize: 14, color: Colors.grey),
                 ),
-                SizedBox(height: 8),
-                Text(
+                const SizedBox(height: 8),
+                const Text(
                   "24 Followers · 8 Following",
                   style: TextStyle(fontSize: 14, color: Colors.grey),
                 ),
@@ -114,22 +180,13 @@ class AccountPage extends StatelessWidget {
                   Expanded(
                     child: TabBarView(
                       children: [
-                        // Posts Tab
+                        // Posts Tab - Dynamically fetch user recipes
                         ListView(
                           padding: const EdgeInsets.all(16),
                           children: List.generate(
-                            // Filter userPostedRecipes by specific images
-                            recipes
-                                .where((recipe) => recipe["image"] == "assets/images/recipe_user1.jpg" ||
-                                    recipe["image"] == "assets/images/recipe_user2.jpg")
-                                .toList()
-                                .length,
+                            userAddedRecipes.length,
                             (index) {
-                              final filteredRecipes = recipes
-                                  .where((recipe) => recipe["image"] == "assets/images/recipe_user1.jpg" ||
-                                      recipe["image"] == "assets/images/recipe_user2.jpg")
-                                  .toList();
-                              final recipe = filteredRecipes[index];
+                              final recipe = userAddedRecipes[index];
                               return Column(
                                 children: [
                                   _buildUserPostCard(
@@ -208,36 +265,76 @@ class AccountPage extends StatelessWidget {
       child: Card(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         elevation: 3,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Stack(
           children: [
-            ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-              child: Image.asset(
-                recipe['image'],
-                height: 150,
-                width: double.infinity,
-                fit: BoxFit.cover,
-              ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ClipRRect(
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                  child: Image.asset(
+                    recipe['image'] ?? 'assets/images/default_recipe.jpg', // Fallback image
+                    height: 150,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        recipe['title'] ?? "No Title",
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        recipe['description'] ?? "No Description",
+                        style: const TextStyle(fontSize: 14, color: Colors.grey),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-            Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    recipe['title'],
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    recipe['description'],
-                    style: const TextStyle(fontSize: 14, color: Colors.grey),
-                  ),
-                ],
+            Positioned(
+              top: 8,
+              right: 8,
+              child: IconButton(
+                icon: const Icon(Icons.delete, color: Colors.red),
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: const Text("Delete Recipe"),
+                        content: const Text("Are you sure you want to delete this recipe?"),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop(); // Close dialog
+                            },
+                            child: const Text("Cancel"),
+                          ),
+                          ElevatedButton(
+                            onPressed: () {
+                              Navigator.of(context).pop(); // Close dialog
+                              _deleteRecipe(context, recipe); // Call delete logic
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.red,
+                            ),
+                            child: const Text("Delete"),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                },
               ),
             ),
           ],

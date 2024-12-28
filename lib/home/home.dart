@@ -193,7 +193,23 @@ class _HomePageState extends State<HomePage> {
       "difficulty": "Easy",
     },
   ];
-
+  final List<Map<String, String>> _cookbooks = [
+      {
+        "image": "assets/images/cookbook1.jpg",
+        "title": "Buku resep spesial antara",
+        "description": "Keep it easy with these simple but delicious recipes.",
+        "likes": "1.3k",
+        "recipes": "7"
+      },
+      {
+        "image": "assets/images/cookbook2.jpg",
+        "title": "Buku resep Nusantara",
+        "description": "Explore traditional recipes from all around Indonesia.",
+        "likes": "800",
+        "recipes": "12"
+      },
+    ];
+  
   // Function to handle bottom navigation bar taps
   void _onItemTapped(int index) {
     if (index == 1) {
@@ -211,6 +227,266 @@ class _HomePageState extends State<HomePage> {
       });
     }
   }
+  
+  void _addCookbook(BuildContext context) {
+    String? title;
+    String? description;
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Add Cookbook"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                decoration: const InputDecoration(labelText: "Title"),
+                onChanged: (value) {
+                  title = value;
+                },
+              ),
+              TextField(
+                decoration: const InputDecoration(labelText: "Description"),
+                onChanged: (value) {
+                  description = value;
+                },
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text("Cancel"),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                if (title != null && description != null) {
+                  setState(() {
+                    _cookbooks.add({
+                      "image": "assets/images/cookbook_default.jpg", // Default image for new cookbook
+                      "title": title!,
+                      "description": description!,
+                      "likes": "0",
+                      "recipes": "0"
+                    });
+                  });
+                  Navigator.of(context).pop();
+                }
+              },
+              child: const Text("Add"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _onFabClick(BuildContext context) {
+  showModalBottomSheet(
+    context: context,
+    builder: (BuildContext context) {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            leading: const Icon(Icons.book),
+            title: const Text("Add Cookbook"),
+            onTap: () {
+              Navigator.of(context).pop();
+              _addCookbook(context);
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.receipt),
+            title: const Text("Add Recipe"),
+            onTap: () {
+              Navigator.of(context).pop();
+              Navigator.pushNamed(context, '/add-recipe'); // Call the new function
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
+
+  void _addRecipe(BuildContext context) {
+  String? title;
+  String? description;
+  String? cookTimeMinutes;
+  String? cookTimeHours;
+  List<String> ingredients = [];
+  List<String> steps = [];
+
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          void _addIngredient(String ingredient) {
+            if (ingredient.isNotEmpty) {
+              setState(() {
+                ingredients.add(ingredient);
+              });
+            }
+          }
+
+          void _addStep(String step) {
+            if (step.isNotEmpty) {
+              setState(() {
+                steps.add(step);
+              });
+            }
+          }
+
+          return AlertDialog(
+            title: const Text("Add Recipe"),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Title Field
+                  TextField(
+                    decoration: const InputDecoration(labelText: "Title"),
+                    onChanged: (value) {
+                      title = value;
+                    },
+                  ),
+                  // Description Field
+                  TextField(
+                    decoration: const InputDecoration(labelText: "Description"),
+                    onChanged: (value) {
+                      description = value;
+                    },
+                  ),
+                  // Cook Time Fields
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          keyboardType: TextInputType.number,
+                          decoration: const InputDecoration(labelText: "Cook Time (Minutes)"),
+                          onChanged: (value) {
+                            cookTimeMinutes = value;
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: TextField(
+                          keyboardType: TextInputType.number,
+                          decoration: const InputDecoration(labelText: "Cook Time (Hours)"),
+                          onChanged: (value) {
+                            cookTimeHours = value;
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Ingredients Section
+                  const Text("Ingredients", style: TextStyle(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 8),
+                  Column(
+                    children: ingredients
+                        .asMap()
+                        .entries
+                        .map(
+                          (entry) => ListTile(
+                            title: Text(entry.value),
+                            trailing: IconButton(
+                              icon: const Icon(Icons.delete, color: Colors.red),
+                              onPressed: () {
+                                setState(() {
+                                  ingredients.removeAt(entry.key);
+                                });
+                              },
+                            ),
+                          ),
+                        )
+                        .toList(),
+                  ),
+                  TextField(
+                    onSubmitted: _addIngredient,
+                    decoration: const InputDecoration(
+                      hintText: "Add Ingredient",
+                      suffixIcon: Icon(Icons.add, color: Colors.orangeAccent),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Steps Section
+                  const Text("Steps", style: TextStyle(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 8),
+                  Column(
+                    children: steps
+                        .asMap()
+                        .entries
+                        .map(
+                          (entry) => ListTile(
+                            title: Text(entry.value),
+                            trailing: IconButton(
+                              icon: const Icon(Icons.delete, color: Colors.red),
+                              onPressed: () {
+                                setState(() {
+                                  steps.removeAt(entry.key);
+                                });
+                              },
+                            ),
+                          ),
+                        )
+                        .toList(),
+                  ),
+                  TextField(
+                    onSubmitted: _addStep,
+                    decoration: const InputDecoration(
+                      hintText: "Add Step",
+                      suffixIcon: Icon(Icons.add, color: Colors.orangeAccent),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text("Cancel"),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  if (title != null && description != null) {
+                    setState(() {
+                      // Add the new recipe to a global or local list
+                      recipes.add({
+                        "title": title!,
+                        "description": description!,
+                        "time": "${cookTimeHours ?? '0'}h ${cookTimeMinutes ?? '0'}m",
+                        "ingredients": ingredients,
+                        "steps": steps,
+                        "image": "assets/images/default_recipe.jpg", // Default image
+                        "difficulty": "Medium", // Default difficulty
+                        "likes": 0,
+                        "reviews": "0 Reviews",
+                      });
+                    });
+                    Navigator.of(context).pop();
+                  }
+                },
+                child: const Text("Add"),
+              ),
+            ],
+          );
+        },
+      );
+    },
+  );
+}
+
 
   Widget _buildCategoryItem(String imagePath, String title) {
     return Padding(
@@ -243,23 +519,6 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final List<Map<String, String>> cookbooks = [
-      {
-        "image": "assets/images/cookbook1.jpg",
-        "title": "Buku resep spesial antara",
-        "description": "Keep it easy with these simple but delicious recipes.",
-        "likes": "1.3k",
-        "recipes": "7"
-      },
-      {
-        "image": "assets/images/cookbook2.jpg",
-        "title": "Buku resep Nusantara",
-        "description": "Explore traditional recipes from all around Indonesia.",
-        "likes": "800",
-        "recipes": "12"
-      },
-    ];
-
     final List<Map<String, String>> communityRecipes = [
       {
         "image": "assets/images/recipe1.jpg",
@@ -284,6 +543,8 @@ class _HomePageState extends State<HomePage> {
       },
     ];
 
+
+  
     return Scaffold(
       appBar: PreferredSize(
       preferredSize: const Size.fromHeight(100), 
@@ -352,10 +613,11 @@ class _HomePageState extends State<HomePage> {
            SizedBox(
   height: 300,
   child: PageView.builder(
-    controller: PageController(viewportFraction: 0.9), // Adjust viewport fraction for slide effect
-    itemCount: cookbooks.length,
+    controller: PageController(viewportFraction: 0.9), 
+    physics: BouncingScrollPhysics(),// Adjust viewport fraction for slide effect
+    itemCount: _cookbooks.length,
     itemBuilder: (context, index) {
-      final cookbook = cookbooks[index];
+      final cookbook = _cookbooks[index];
       return GestureDetector(
         onTap: () {
           Navigator.pushNamed(
@@ -605,14 +867,12 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // Add functionality for the button
-        },
-        backgroundColor: Colors.orangeAccent,
-        child: const Icon(Icons.add, color: Colors.white),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      bottomNavigationBar: BottomNavigationBar(
+          onPressed: () => _onFabClick(context),
+          backgroundColor: Colors.orangeAccent,
+          child: const Icon(Icons.add),
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+        bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         backgroundColor: Colors.white,
         selectedItemColor: Colors.orangeAccent,

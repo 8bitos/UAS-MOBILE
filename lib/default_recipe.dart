@@ -1,3 +1,6 @@
+//data dummy untuk manggil resep
+//
+
 List<Map<String, dynamic>> recipes = [
   {
     "image": "assets/images/recipe1.jpg",

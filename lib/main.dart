@@ -13,6 +13,7 @@ import 'cookbook/cookbook_detailed.dart';
 import 'community/review_page.dart';
 import 'community/grocery_list.dart';
 import 'community/edit_recipe.dart';
+import 'community/add_recipe.dart';
 
 void main() {
   runApp(const MyApp());
@@ -38,8 +39,16 @@ class MyApp extends StatelessWidget {
         '/notification': (context) => const NotificationPage(),
         '/community-recipes': (context) => const CommunityPage(),
         '/acc-setting': (context) => const AccSettingPage(),
-        '/editProfile': (context) => const EditProfilePage(),
+        '/edit-profile': (context) => EditProfilePage(
+            initialData: {
+              'name': 'Nararaya Kirana', // Replace with actual default data or variables
+              'bio': 'Rajin menabung dan suka memasak',
+              'profileImage': 'assets/images/profile.png',
+              'coverImage': 'assets/images/profile_cover.png',
+            },
+          ),
         '/recipe-detail': (context) => const RecipeDetailPage(),
+        '/add-recipe': (context) => const AddRecipePage(),
         '/cookbook-detail': (context) {
           final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
           return CookbookDetailPage(

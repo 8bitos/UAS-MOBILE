@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart'; // Import ImagePicker
+import 'dart:io'; // Import for handling File operations
 
 class EditRecipePage extends StatefulWidget {
   final Map<String, dynamic> recipe;
@@ -20,6 +22,7 @@ class _EditRecipePageState extends State<EditRecipePage> {
   late String cookTimeMinutes;
   late String cookTimeHours;
   bool publishToCommunity = false;
+  File? _recipeImage; // To store the selected image
 
   @override
   void initState() {
@@ -36,6 +39,18 @@ class _EditRecipePageState extends State<EditRecipePage> {
     cookTimeMinutes = widget.recipe['cookTimeMinutes'] ?? '0';
     cookTimeHours = widget.recipe['cookTimeHours'] ?? '0';
     publishToCommunity = widget.recipe['publishToCommunity'] ?? false;
+  }
+
+  Future<void> _pickImage() async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? pickedImage =
+        await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedImage != null) {
+      setState(() {
+        _recipeImage = File(pickedImage.path); // Update the recipe image
+      });
+    }
   }
 
   void _addIngredient(String ingredient) {
@@ -79,6 +94,7 @@ class _EditRecipePageState extends State<EditRecipePage> {
       'cookTimeMinutes': cookTimeMinutes,
       'cookTimeHours': cookTimeHours,
       'publishToCommunity': publishToCommunity,
+      'image': _recipeImage?.path ?? widget.recipe['image'], // Save selected image path or fallback
     };
 
     // Pass the updated recipe back to the previous screen
@@ -121,6 +137,38 @@ class _EditRecipePageState extends State<EditRecipePage> {
               // Intro Section
               const Text("Intro", style: TextStyle(fontWeight: FontWeight.bold)),
               const SizedBox(height: 16),
+
+              // Recipe Image
+              GestureDetector(
+                onTap: _pickImage,
+                child: Center(
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      _recipeImage != null
+                          ? Image.file(
+                              _recipeImage!,
+                              height: 150,
+                              width: double.infinity,
+                              fit: BoxFit.cover,
+                            )
+                          : Image.asset(
+                              widget.recipe['image'] ?? 'assets/images/default_recipe.jpg',
+                              height: 150,
+                              width: double.infinity,
+                              fit: BoxFit.cover,
+                            ),
+                      const Icon(
+                        Icons.camera_alt,
+                        color: Colors.white,
+                        size: 48,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+
               TextField(
                 controller: titleController,
                 decoration: const InputDecoration(labelText: "Title"),
@@ -136,7 +184,8 @@ class _EditRecipePageState extends State<EditRecipePage> {
                   Expanded(
                     child: TextField(
                       keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(labelText: "Cook Time (minutes)"),
+                      decoration:
+                          const InputDecoration(labelText: "Cook Time (minutes)"),
                       onChanged: (value) {
                         cookTimeMinutes = value;
                       },
@@ -146,7 +195,8 @@ class _EditRecipePageState extends State<EditRecipePage> {
                   Expanded(
                     child: TextField(
                       keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(labelText: "Cook Time (hours)"),
+                      decoration:
+                          const InputDecoration(labelText: "Cook Time (hours)"),
                       onChanged: (value) {
                         cookTimeHours = value;
                       },

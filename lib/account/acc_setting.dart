@@ -67,7 +67,7 @@ class AccSettingPage extends StatelessWidget {
                   // Circular Edit Icon
                   GestureDetector(
                     onTap: () {
-                      Navigator.pushNamed(context, '/editProfile'); // Navigate to edit profile page
+                      Navigator.pushNamed(context, '/edit-profile'); // Navigate to edit profile page
                     },
                     child: Container(
                       padding: const EdgeInsets.all(8),
