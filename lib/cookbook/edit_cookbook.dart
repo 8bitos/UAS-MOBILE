@@ -96,22 +96,38 @@ class _CookbookEditPageState extends State<CookbookEditPage> {
                 child: Stack(
                   alignment: Alignment.bottomRight,
                   children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(16),
-                      child: _selectedImage != null && _selectedImage!.isNotEmpty
-                        ? Image.file(
-                            File(_selectedImage!), // Display selected image
-                            width: double.infinity,
-                            height: 200,
-                            fit: BoxFit.cover,
-                          )
-                        : Image.asset(
-                            'assets/cookbook/cookbook.jpg', // Fallback image
-                            width: double.infinity,
-                            height: 200,
-                            fit: BoxFit.cover,
-                          ),
-                    ),
+                   ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: _selectedImage != null && _selectedImage!.isNotEmpty
+                      ? Image.file(
+                          File(_selectedImage!),
+                          width: double.infinity,
+                          height: 200,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Image.asset(
+                              'assets/images/default_recipe.jpg',
+                              width: double.infinity,
+                              height: 200,
+                              fit: BoxFit.cover,
+                            );
+                          },
+                        )
+                      : Image.asset(
+                          'assets/images/default_recipe.jpg',
+                          width: double.infinity,
+                          height: 200,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Container(
+                              width: double.infinity,
+                              height: 200,
+                              color: Colors.grey[300],
+                              child: Icon(Icons.image, size: 50, color: Colors.grey[600]),
+                            );
+                          },
+                        ),
+                  ),
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: const BoxDecoration(

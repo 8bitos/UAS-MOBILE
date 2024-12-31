@@ -353,25 +353,85 @@ class _AccountPageState extends State<AccountPage> {
   }
 
   Widget _buildReviewsTab() {
-    return ListView(
-      padding: const EdgeInsets.all(16),
-      children: [
-        _buildUserReview(
-          recipeTitle: "Resep Ikan Bakar Bumbu Kecap",
-          reviewText: "This recipe was amazing! Flavorful and easy to make.",
-          rating: 4.5,
-          image: 'assets/images/recipe_user1.jpg',
-        ),
-        const SizedBox(height: 16),
-        _buildUserReview(
-          recipeTitle: "Resep Soto Ayam Segar",
-          reviewText: "The broth was so refreshing and flavorful!",
-          rating: 4.0,
-          image: 'assets/images/recipe_user2.jpg',
-        ),
-      ],
-    );
-  }
+  return Consumer<UserProvider>(
+    builder: (context, userProvider, child) {
+      final reviews = userProvider.userReviews;
+      
+      if (reviews.isEmpty) {
+        return const Center(
+          child: Text('No reviews yet'),
+        );
+      }
+      
+      return ListView.builder(
+        padding: const EdgeInsets.all(16),
+        itemBuilder: (context, index) {
+          final review = reviews[index];
+          return Card(
+            margin: const EdgeInsets.only(bottom: 16),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      CircleAvatar(
+                        backgroundImage: AssetImage(review['userImage'] ?? 'assets/images/profile.png'),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              review['recipeTitle'],
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Reviewed on ${review['timestamp'].toString().split(' ')[0]}',
+                              style: const TextStyle(
+                                color: Colors.grey,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: List.generate(
+                      5,
+                      (index) => Icon(
+                        index < (review['rating'] as num).toInt()
+                            ? Icons.star
+                            : Icons.star_border,
+                        color: Colors.orangeAccent,
+                        size: 20,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    review['reviewText'],
+                    style: const TextStyle(fontSize: 14),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+        itemCount: reviews.length,
+      );
+    },
+  );
+}
 
   Widget _buildLikedRecipesTab() {
     return ListView(

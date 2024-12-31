@@ -33,17 +33,25 @@ class _CookbookDetailPageState extends State<CookbookDetailPage> {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final cookbook = userProvider.getCookbookById(widget.cookbookId);
     if (cookbook != null) {
-      photo = cookbook['image'] ?? 'assets/cookbook/cookbook.jpg';
-      title = cookbook['title'];
-      description = cookbook['description'];
-      recipes = List<Map<String, dynamic>>.from(cookbook['recipes'] ?? []);
-    } else {
-      photo = 'assets/cookbook/cookbook.jpg';
-      title = 'Cookbook Not Found';
-      description = 'No description available';
-      recipes = [];
+    try {
+      photo = cookbook['image'];
+      if (photo == null || photo.isEmpty) {
+        photo = 'assets/images/default_recipe.jpg';
+      }
+    } catch (e) {
+      photo = 'assets/images/default_recipe.jpg';
     }
+    title = cookbook['title'];
+    description = cookbook['description'];
+    recipes = List<Map<String, dynamic>>.from(cookbook['recipes'] ?? []);
+  } else {
+    photo = 'assets/images/default_recipe.jpg';
+    title = 'Cookbook Not Found';
+    description = 'No description available';
+    recipes = [];
   }
+}
+
 
   void _addRecipeToCookbook() {
   final userProvider = Provider.of<UserProvider>(context, listen: false);
@@ -81,13 +89,21 @@ class _CookbookDetailPageState extends State<CookbookDetailPage> {
                             });
                           },
                           title: Text(recipe['title'] ?? ''),
-                          secondary: ClipRRect(
+                         secondary: ClipRRect(
                             borderRadius: BorderRadius.circular(8),
                             child: Image.asset(
                               recipe['image'] ?? 'assets/images/default_recipe.jpg',
                               width: 50,
                               height: 50,
                               fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Image.asset(
+                                  'assets/images/default_recipe.jpg',
+                                  width: 50,
+                                  height: 50,
+                                  fit: BoxFit.cover,
+                                );
+                              },
                             ),
                           ),
                         );
@@ -282,15 +298,23 @@ class _CookbookDetailPageState extends State<CookbookDetailPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(16),
-                    child: Image.asset(
-                      photo,
-                      width: double.infinity,
-                      height: 200,
-                      fit: BoxFit.cover,
+                 ClipRRect(
+                      borderRadius: BorderRadius.circular(16),
+                      child: Image.asset(
+                        photo,
+                        width: double.infinity,
+                        height: 200,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Image.asset(
+                            'assets/images/default_recipe.jpg',
+                            width: double.infinity,
+                            height: 200,
+                            fit: BoxFit.cover,
+                          );
+                        },
+                      ),
                     ),
-                  ),
                   const SizedBox(height: 16),
                   Text(
                     title,
@@ -345,6 +369,14 @@ class _CookbookDetailPageState extends State<CookbookDetailPage> {
                               width: 60,
                               height: 60,
                               fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Image.asset(
+                                  'assets/images/default_recipe.jpg',
+                                  width: 60,
+                                  height: 60,
+                                  fit: BoxFit.cover,
+                                );
+                              },
                             ),
                           ),
                           title: Text(

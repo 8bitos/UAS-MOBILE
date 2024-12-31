@@ -151,6 +151,37 @@ class _EditRecipePageState extends State<EditRecipePage> {
               decoration: const InputDecoration(labelText: 'Description'),
             ),
             const SizedBox(height: 16),
+            // Cooking Time
+              const Text('Cooking Time:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        labelText: 'Hours',
+                        suffixText: 'h',
+                      ),
+                      onChanged: (value) => setState(() => cookTimeHours = value),
+                      controller: TextEditingController(text: cookTimeHours),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: TextField(
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        labelText: 'Minutes',
+                        suffixText: 'm',
+                      ),
+                      onChanged: (value) => setState(() => cookTimeMinutes = value),
+                      controller: TextEditingController(text: cookTimeMinutes),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
             // Difficulty
             const Text('Difficulty:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             Row(

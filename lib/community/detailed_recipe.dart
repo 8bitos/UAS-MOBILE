@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import '../home/review_dialog.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class RecipeDetailPage extends StatefulWidget {
@@ -176,6 +177,12 @@ class _RecipeDetailPageState extends State<RecipeDetailPage> {
             }
           },
         ),
+        IconButton(
+        icon: const Icon(Icons.rate_review, color: Colors.orangeAccent),
+        onPressed: () {
+          showReviewDialog(context, title);
+        },
+      ),
             IconButton(
               icon: const Icon(Icons.shopping_cart, color: Colors.orangeAccent),
               onPressed: () {

@@ -34,6 +34,7 @@ dependencies:
   carousel_slider: ^4.2.0
   image_picker: ^0.8.5
   provider: ^6.0.5
+  awesome_notifications: ^0.7.4+1
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -81,7 +82,7 @@ flutter:
     - assets/images/recipe_user1.jpg
     - assets/images/recipe_user2.jpg
     - assets/images/default_recipe.jpg
-    - assets/cookbook/cookbook.jpg
+    
  
 
   # To add assets to your application, add an assets section, like this:

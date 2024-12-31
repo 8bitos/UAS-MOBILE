@@ -716,7 +716,7 @@ body: SingleChildScrollView(
             label: "",
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.shopping_cart, size: 28),
+            icon: Icon(Icons.chat, size: 28),
             label: "",
           ),
           BottomNavigationBarItem(
@@ -728,3 +728,4 @@ body: SingleChildScrollView(
     );
   }
 }
+

@@ -19,12 +19,16 @@ import 'community/edit_recipe.dart';
 import 'community/add_recipe.dart';
 import 'screens/auth_screen.dart';
 import 'screens/forgot_pass_screen.dart';
+import 'provider/notification_service.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await NotificationService.initialize();
+  
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (context) => UserProvider()), // Ensure UserProvider is added here
+        ChangeNotifierProvider(create: (_) => UserProvider()),
       ],
       child: const MyApp(),
     ),
@@ -191,3 +195,4 @@ class MyApp extends StatelessWidget {
     );
   }
 }
+
