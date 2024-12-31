@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
-import 'package:uas_cookedex/default_recipe.dart'; // Import the global recipe list
+import 'package:provider/provider.dart';
+import '../provider/user_provider.dart';
 
 class AddRecipePage extends StatefulWidget {
-  const AddRecipePage({Key? key}) : super(key: key);
+  const AddRecipePage({super.key});
 
   @override
   State<AddRecipePage> createState() => _AddRecipePageState();
@@ -52,29 +53,34 @@ class _AddRecipePageState extends State<AddRecipePage> {
 
   // Submit the recipe
   void _submitRecipe() {
-    if (_formKey.currentState!.validate()) {
-      final newRecipe = {
-        "image": _selectedImage != null
-            ? _selectedImage!.path // Use the selected image if available
-            : "assets/images/default_recipe.jpg", // Fallback to default image
-        "title": title!,
-        "description": description!,
-        "time": "${cookTimeHours ?? '0'}h ${cookTimeMinutes ?? '0'}m",
-        "ingredients": ingredients,
-        "steps": steps,
-        "difficulty": "Medium", // Default difficulty
-        "likes": 0,
-        "reviews": "0 Reviews",
-      };
+  if (_formKey.currentState!.validate()) {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
 
-      // Add the new recipe to the global `recipes` list
-      setState(() {
-        recipes.add(newRecipe);
-      });
+    final newRecipe = {
+      "image": _selectedImage != null
+          ? _selectedImage!.path
+          : "assets/images/default_recipe.jpg",
+      "title": title!,
+      "description": description!,
+      "time": "${cookTimeHours ?? '0'}h ${cookTimeMinutes ?? '0'}m",
+      "ingredients": ingredients,
+      "steps": steps,
+      "difficulty": "Medium",
+      "author": userProvider.name,
+    };
 
-      Navigator.of(context).pop(); // Close the page and go back
-    }
+    // Add the new recipe
+    userProvider.addRecipe(newRecipe);
+    
+    // Show confirmation
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Recipe added successfully')),
+    );
+
+    // Navigate back
+    Navigator.of(context).pop();
   }
+}
 
   @override
   Widget build(BuildContext context) {

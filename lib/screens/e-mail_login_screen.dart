@@ -197,7 +197,7 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
 }
 
 class PasswordField extends StatefulWidget {
-  const PasswordField({Key? key, required this.labelText, required this.controller}) : super(key: key);
+  const PasswordField({super.key, required this.labelText, required this.controller});
 
   final String labelText;
   final TextEditingController controller;

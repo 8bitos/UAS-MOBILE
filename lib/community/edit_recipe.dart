@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart'; // Import ImagePicker
-import 'dart:io'; // Import for handling File operations
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 
 class EditRecipePage extends StatefulWidget {
   final Map<String, dynamic> recipe;
 
-  const EditRecipePage({Key? key, required this.recipe}) : super(key: key);
+  const EditRecipePage({super.key, required this.recipe});
 
   @override
   _EditRecipePageState createState() => _EditRecipePageState();
@@ -14,41 +14,38 @@ class EditRecipePage extends StatefulWidget {
 class _EditRecipePageState extends State<EditRecipePage> {
   late TextEditingController titleController;
   late TextEditingController descriptionController;
-  late TextEditingController sourceController;
   late List<String> ingredients;
   late List<String> steps;
-  late String difficulty;
-  late String serve;
+  late int difficulty; // Use integer for star rating
   late String cookTimeMinutes;
   late String cookTimeHours;
-  bool publishToCommunity = false;
-  File? _recipeImage; // To store the selected image
+  File? _recipeImage;
 
   @override
   void initState() {
     super.initState();
-    // Initialize controllers with the existing recipe data
     titleController = TextEditingController(text: widget.recipe['title']);
-    descriptionController =
-        TextEditingController(text: widget.recipe['description']);
-    sourceController = TextEditingController(text: widget.recipe['source']);
+    descriptionController = TextEditingController(text: widget.recipe['description']);
     ingredients = List<String>.from(widget.recipe['ingredients'] ?? []);
     steps = List<String>.from(widget.recipe['steps'] ?? []);
-    difficulty = widget.recipe['difficulty'] ?? 'Easy';
-    serve = widget.recipe['serve'] ?? '1 Person';
+
+    // Map difficulty string to an integer
+    difficulty = widget.recipe['difficulty'] == 'Easy'
+        ? 1
+        : widget.recipe['difficulty'] == 'Medium'
+            ? 2
+            : 3; // Default to 3 (Hard) if no match
+
     cookTimeMinutes = widget.recipe['cookTimeMinutes'] ?? '0';
     cookTimeHours = widget.recipe['cookTimeHours'] ?? '0';
-    publishToCommunity = widget.recipe['publishToCommunity'] ?? false;
   }
 
   Future<void> _pickImage() async {
     final ImagePicker picker = ImagePicker();
-    final XFile? pickedImage =
-        await picker.pickImage(source: ImageSource.gallery);
-
+    final XFile? pickedImage = await picker.pickImage(source: ImageSource.gallery);
     if (pickedImage != null) {
       setState(() {
-        _recipeImage = File(pickedImage.path); // Update the recipe image
+        _recipeImage = File(pickedImage.path);
       });
     }
   }
@@ -69,35 +66,21 @@ class _EditRecipePageState extends State<EditRecipePage> {
     }
   }
 
-  void _deleteIngredient(int index) {
-    setState(() {
-      ingredients.removeAt(index);
-    });
-  }
-
-  void _deleteStep(int index) {
-    setState(() {
-      steps.removeAt(index);
-    });
-  }
-
   void _saveRecipe() {
-    // Collect the updated data
     final updatedRecipe = {
       'title': titleController.text,
       'description': descriptionController.text,
-      'source': sourceController.text,
       'ingredients': ingredients,
       'steps': steps,
-      'difficulty': difficulty,
-      'serve': serve,
+      'difficulty': difficulty == 1
+          ? 'Easy'
+          : difficulty == 2
+              ? 'Medium'
+              : 'Hard', // Map back to string
       'cookTimeMinutes': cookTimeMinutes,
       'cookTimeHours': cookTimeHours,
-      'publishToCommunity': publishToCommunity,
       'image': _recipeImage?.path ?? widget.recipe['image'], // Save selected image path or fallback
     };
-
-    // Pass the updated recipe back to the previous screen
     Navigator.pop(context, updatedRecipe);
   }
 
@@ -114,7 +97,7 @@ class _EditRecipePageState extends State<EditRecipePage> {
           },
         ),
         title: const Text(
-          "Recipe Form",
+          "Edit Recipe",
           style: TextStyle(color: Colors.black),
         ),
         actions: [
@@ -127,141 +110,109 @@ class _EditRecipePageState extends State<EditRecipePage> {
           ),
         ],
       ),
-      backgroundColor: Colors.white,
       body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Intro Section
-              const Text("Intro", style: TextStyle(fontWeight: FontWeight.bold)),
-              const SizedBox(height: 16),
-
-              // Recipe Image
-              GestureDetector(
-                onTap: _pickImage,
-                child: Center(
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      _recipeImage != null
-                          ? Image.file(
-                              _recipeImage!,
-                              height: 150,
-                              width: double.infinity,
-                              fit: BoxFit.cover,
-                            )
-                          : Image.asset(
-                              widget.recipe['image'] ?? 'assets/images/default_recipe.jpg',
-                              height: 150,
-                              width: double.infinity,
-                              fit: BoxFit.cover,
-                            ),
-                      const Icon(
-                        Icons.camera_alt,
-                        color: Colors.white,
-                        size: 48,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              TextField(
-                controller: titleController,
-                decoration: const InputDecoration(labelText: "Title"),
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: descriptionController,
-                decoration: const InputDecoration(labelText: "Description"),
-              ),
-              const SizedBox(height: 8),
-              Row(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Recipe Image
+            GestureDetector(
+              onTap: _pickImage,
+              child: Stack(
+                alignment: Alignment.center,
                 children: [
-                  Expanded(
-                    child: TextField(
-                      keyboardType: TextInputType.number,
-                      decoration:
-                          const InputDecoration(labelText: "Cook Time (minutes)"),
-                      onChanged: (value) {
-                        cookTimeMinutes = value;
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: TextField(
-                      keyboardType: TextInputType.number,
-                      decoration:
-                          const InputDecoration(labelText: "Cook Time (hours)"),
-                      onChanged: (value) {
-                        cookTimeHours = value;
-                      },
-                    ),
-                  ),
+                  _recipeImage != null
+                      ? Image.file(
+                          _recipeImage!,
+                          height: 200,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                        )
+                      : Image.asset(
+                          widget.recipe['image'] ?? 'assets/images/default_recipe.jpg',
+                          height: 200,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                        ),
+                  const Icon(Icons.camera_alt, size: 48, color: Colors.white),
                 ],
               ),
-              const SizedBox(height: 16),
-
-              // Ingredients Section
-              const Text("Ingredients",
-                  style: TextStyle(fontWeight: FontWeight.bold)),
-              const SizedBox(height: 8),
-              Column(
-                children: ingredients
-                    .asMap()
-                    .entries
-                    .map(
-                      (entry) => ListTile(
-                        title: Text(entry.value),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.delete, color: Colors.red),
-                          onPressed: () => _deleteIngredient(entry.key),
-                        ),
+            ),
+            const SizedBox(height: 16),
+            // Title
+            TextField(
+              controller: titleController,
+              decoration: const InputDecoration(labelText: 'Title'),
+            ),
+            const SizedBox(height: 8),
+            // Description
+            TextField(
+              controller: descriptionController,
+              decoration: const InputDecoration(labelText: 'Description'),
+            ),
+            const SizedBox(height: 16),
+            // Difficulty
+            const Text('Difficulty:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            Row(
+              children: List.generate(3, (index) {
+                return IconButton(
+                  icon: Icon(
+                    index < difficulty ? Icons.star : Icons.star_border,
+                    color: Colors.orangeAccent,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      difficulty = index + 1; // Set difficulty based on star selected
+                    });
+                  },
+                );
+              }),
+            ),
+            const SizedBox(height: 16),
+            // Ingredients
+            const Text('Ingredients', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            Column(
+              children: ingredients
+                  .asMap()
+                  .entries
+                  .map(
+                    (entry) => ListTile(
+                      title: Text(entry.value),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.delete, color: Colors.red),
+                        onPressed: () => setState(() => ingredients.removeAt(entry.key)),
                       ),
-                    )
-                    .toList(),
-              ),
-              TextField(
-                onSubmitted: _addIngredient,
-                decoration: const InputDecoration(
-                  hintText: "Add Ingredient",
-                  suffixIcon: Icon(Icons.add, color: Colors.orangeAccent),
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Steps Section
-              const Text("Steps", style: TextStyle(fontWeight: FontWeight.bold)),
-              const SizedBox(height: 8),
-              Column(
-                children: steps
-                    .asMap()
-                    .entries
-                    .map(
-                      (entry) => ListTile(
-                        title: Text(entry.value),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.delete, color: Colors.red),
-                          onPressed: () => _deleteStep(entry.key),
-                        ),
+                    ),
+                  )
+                  .toList(),
+            ),
+            TextField(
+              onSubmitted: _addIngredient,
+              decoration: const InputDecoration(hintText: 'Add Ingredient'),
+            ),
+            const SizedBox(height: 16),
+            // Steps
+            const Text('Steps', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            Column(
+              children: steps
+                  .asMap()
+                  .entries
+                  .map(
+                    (entry) => ListTile(
+                      title: Text(entry.value),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.delete, color: Colors.red),
+                        onPressed: () => setState(() => steps.removeAt(entry.key)),
                       ),
-                    )
-                    .toList(),
-              ),
-              TextField(
-                onSubmitted: _addStep,
-                decoration: const InputDecoration(
-                  hintText: "Add Step",
-                  suffixIcon: Icon(Icons.add, color: Colors.orangeAccent),
-                ),
-              ),
-              const SizedBox(height: 16),
-            ],
-          ),
+                    ),
+                  )
+                  .toList(),
+            ),
+            TextField(
+              onSubmitted: _addStep,
+              decoration: const InputDecoration(hintText: 'Add Step'),
+            ),
+          ],
         ),
       ),
     );

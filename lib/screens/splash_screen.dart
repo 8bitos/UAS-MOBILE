@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'auth_screen.dart'; 
 
 class SplashScreen extends StatefulWidget {
-  const SplashScreen({Key? key}) : super(key: key);
+  const SplashScreen({super.key});
 
   @override
   State<SplashScreen> createState() => _SplashScreenState();
@@ -84,7 +84,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.restaurant_menu,
                       size: 48,
                       color: Colors.orangeAccent,

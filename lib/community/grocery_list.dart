@@ -3,8 +3,7 @@ import 'package:flutter/material.dart';
 class GroceryListPage extends StatefulWidget {
   final List<Map<String, dynamic>> initialIngredients;
 
-  const GroceryListPage({Key? key, required this.initialIngredients})
-      : super(key: key);
+  const GroceryListPage({super.key, required this.initialIngredients});
 
   @override
   _GroceryListPageState createState() => _GroceryListPageState();

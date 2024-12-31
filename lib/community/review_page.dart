@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class ReviewsPage extends StatelessWidget {
   final List<Map<String, String>> reviews;
 
-  const ReviewsPage({Key? key, required this.reviews}) : super(key: key);
+  const ReviewsPage({super.key, required this.reviews});
 
   @override
   Widget build(BuildContext context) {
@@ -49,9 +49,9 @@ class ReviewsPage extends StatelessWidget {
             padding: const EdgeInsets.all(16.0),
             child: Row(
               children: [
-                Expanded(
+                const Expanded(
                   child: TextField(
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       hintText: "Your review",
                       border: OutlineInputBorder(),
                     ),

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class AccSettingPage extends StatelessWidget {
-  const AccSettingPage({Key? key}) : super(key: key);
+  const AccSettingPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -42,10 +42,10 @@ class AccSettingPage extends StatelessWidget {
                   ),
                   const SizedBox(width: 16),
                   // Profile Details
-                  Expanded(
+                  const Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
+                      children: [
                         Text(
                           "Nararaya Kirana",
                           style: TextStyle(
@@ -64,31 +64,11 @@ class AccSettingPage extends StatelessWidget {
                       ],
                     ),
                   ),
-                  // Circular Edit Icon
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.pushNamed(context, '/edit-profile'); // Navigate to edit profile page
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.orangeAccent, width: 2),
-                        color: Colors.white,
-                      ),
-                      child: const Icon(
-                        Icons.edit,
-                        color: Colors.orangeAccent,
-                        size: 20,
-                      ),
-                    ),
-                  ),
                 ],
               ),
             ),
             const Divider(thickness: 1, color: Colors.grey),
 
-            // General Section
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
@@ -102,15 +82,30 @@ class AccSettingPage extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 16),
+
+                  // Add the "Account Profile" ListTile here
+                  ListTile(
+                    leading: const Icon(Icons.person, color: Colors.black),
+                    title: const Text("Account Profile"),
+                    onTap: () {
+                      Navigator.pushNamed(context, '/acc-credentials');
+                    },
+                  ),
+                  
+                  const SizedBox(height: 16),
+
+                  // Keep the existing ListTiles
                   _buildListTile("About", Icons.info_outline, context),
                   _buildListTile("Help & Support", Icons.help_outline, context),
                   _buildListTile("Send Feedback", Icons.feedback_outlined, context),
                   _buildListTile("Rate Us", Icons.star_border, context),
                   _buildListTile("Check for Update", Icons.update_outlined, context),
-                  _buildListTile("Logout", Icons.logout, context),
+                  _buildListTile("Logout", Icons.logout, context), 
+                  
                 ],
               ),
             ),
+
           ],
         ),
       ),

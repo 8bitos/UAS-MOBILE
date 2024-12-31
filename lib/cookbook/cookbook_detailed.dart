@@ -1,14 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../provider/user_provider.dart';
 
 class CookbookDetailPage extends StatefulWidget {
   final String title;
-  final List<Map<String, String>> recipes;
+  final String description;
+  final String photo;
+  final String cookbookId;
 
   const CookbookDetailPage({
-    Key? key,
+    super.key,
     required this.title,
-    required this.recipes,
-  }) : super(key: key);
+    required this.description,
+    required this.photo,
+    required this.cookbookId,
+  });
 
   @override
   State<CookbookDetailPage> createState() => _CookbookDetailPageState();
@@ -18,22 +24,208 @@ class _CookbookDetailPageState extends State<CookbookDetailPage> {
   late String photo;
   late String title;
   late String description;
-  late List<Map<String, String>> recipes;
+  late List<Map<String, dynamic>> recipes;
+  List<Map<String, dynamic>> selectedRecipes = [];
 
   @override
   void initState() {
     super.initState();
-    // Initialize variables with initial values
-    photo = 'assets/images/cookbook1.jpg';
-    title = widget.title;
-    description = 'Keep it easy with these simple but delicious recipes.';
-    recipes = List<Map<String, String>>.from(widget.recipes); // Make a mutable copy
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final cookbook = userProvider.getCookbookById(widget.cookbookId);
+    if (cookbook != null) {
+      photo = cookbook['image'] ?? 'assets/cookbook/cookbook.jpg';
+      title = cookbook['title'];
+      description = cookbook['description'];
+      recipes = List<Map<String, dynamic>>.from(cookbook['recipes'] ?? []);
+    } else {
+      photo = 'assets/cookbook/cookbook.jpg';
+      title = 'Cookbook Not Found';
+      description = 'No description available';
+      recipes = [];
+    }
   }
 
-  void _deleteRecipe(int index) {
-    setState(() {
-      recipes.removeAt(index); // Remove the recipe from the list
-    });
+  void _addRecipeToCookbook() {
+  final userProvider = Provider.of<UserProvider>(context, listen: false);
+  final availableRecipes = userProvider.userRecipes;
+  selectedRecipes.clear();
+
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return StatefulBuilder(
+        builder: (context, setDialogState) {  // Renamed setState to setDialogState for clarity
+          return AlertDialog(
+            title: const Text("Add Recipes to Cookbook"),
+            content: SizedBox(
+              width: double.maxFinite,
+              height: 400,
+              child: Column(
+                children: [
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: availableRecipes.length,
+                      itemBuilder: (context, index) {
+                        final recipe = availableRecipes[index];
+                        final isSelected = selectedRecipes.contains(recipe);
+                        
+                        return CheckboxListTile(
+                          value: isSelected,
+                          onChanged: (bool? value) {
+                            setDialogState(() {  // Use setDialogState for dialog updates
+                              if (value == true) {
+                                selectedRecipes.add(recipe);
+                              } else {
+                                selectedRecipes.remove(recipe);
+                              }
+                            });
+                          },
+                          title: Text(recipe['title'] ?? ''),
+                          secondary: ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: Image.asset(
+                              recipe['image'] ?? 'assets/images/default_recipe.jpg',
+                              width: 50,
+                              height: 50,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text("Cancel"),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orangeAccent,
+                ),
+                onPressed: () {
+                  if (selectedRecipes.isNotEmpty) {
+                    userProvider.addRecipeToCookbook(widget.cookbookId, selectedRecipes);
+                    
+                    // Update the local state immediately
+                    setState(() {
+                      final updatedCookbook = userProvider.getCookbookById(widget.cookbookId);
+                      if (updatedCookbook != null) {
+                        recipes = List<Map<String, dynamic>>.from(updatedCookbook['recipes'] ?? []);
+                      }
+                    });
+
+                    Navigator.pop(context);
+                    
+                    // Show confirmation
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Recipes added successfully')),
+                    );
+                  }
+                },
+                child: const Text("Add Selected"),
+              ),
+            ],
+          );
+        },
+      );
+    },
+  );
+}
+
+  void _deleteRecipesFromCookbook() {
+    selectedRecipes.clear();
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: const Text("Delete Recipes from Cookbook"),
+              content: SizedBox(
+                width: double.maxFinite,
+                height: 400,
+                child: Column(
+                  children: [
+                    Expanded(
+                      child: ListView.builder(
+                        itemCount: recipes.length,
+                        itemBuilder: (context, index) {
+                          final recipe = recipes[index];
+                          final isSelected = selectedRecipes.contains(recipe);
+                          
+                          return CheckboxListTile(
+                            value: isSelected,
+                            onChanged: (bool? value) {
+                              setState(() {
+                                if (value == true) {
+                                  selectedRecipes.add(recipe);
+                                } else {
+                                  selectedRecipes.remove(recipe);
+                                }
+                              });
+                            },
+                            title: Text(recipe['title'] ?? ''),
+                            secondary: ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Image.asset(
+                                recipe['image'] ?? 'assets/images/default_recipe.jpg',
+                                width: 50,
+                                height: 50,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text("Cancel"),
+                ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                  ),
+                  onPressed: () {
+                    if (selectedRecipes.isNotEmpty) {
+                      final userProvider = Provider.of<UserProvider>(context, listen: false);
+                      // Find cookbook index
+                      final cookbookIndex = userProvider.userCookbooks
+                          .indexWhere((cookbook) => cookbook['id'] == widget.cookbookId);
+                      
+                      // Remove selected recipes
+                      for (var recipe in selectedRecipes) {
+                        final recipeIndex = recipes.indexOf(recipe);
+                        if (recipeIndex != -1) {
+                          userProvider.deleteRecipeFromCookbook(cookbookIndex, recipeIndex);
+                        }
+                      }
+                      
+                      setState(() {
+                        recipes.removeWhere((recipe) => selectedRecipes.contains(recipe));
+                      });
+                      Navigator.pop(context);
+                      // Refresh the page
+                      setState(() {});
+                    }
+                  },
+                  child: const Text("Delete Selected"),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
   }
 
   @override
@@ -44,11 +236,17 @@ class _CookbookDetailPageState extends State<CookbookDetailPage> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () {
-            Navigator.pop(context);
-          },
+          onPressed: () => Navigator.of(context).pop(),
         ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.add_circle_outline, color: Colors.black),
+            onPressed: _addRecipeToCookbook,
+          ),
+          IconButton(
+            icon: const Icon(Icons.delete_outline, color: Colors.black),
+            onPressed: _deleteRecipesFromCookbook,
+          ),
           IconButton(
             icon: const Icon(Icons.edit, color: Colors.black),
             onPressed: () {
@@ -63,9 +261,8 @@ class _CookbookDetailPageState extends State<CookbookDetailPage> {
               ).then((result) {
                 if (result != null) {
                   setState(() {
-                    // Update the cookbook details with the returned result
                     final updatedData = result as Map<String, dynamic>;
-                    photo = updatedData['photo'];
+                    photo = updatedData['photo'] ?? photo;
                     title = updatedData['title'];
                     description = updatedData['description'];
                   });
@@ -80,7 +277,6 @@ class _CookbookDetailPageState extends State<CookbookDetailPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Cookbook Header Section
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Column(
@@ -89,7 +285,7 @@ class _CookbookDetailPageState extends State<CookbookDetailPage> {
                   ClipRRect(
                     borderRadius: BorderRadius.circular(16),
                     child: Image.asset(
-                      photo, // Dynamic photo
+                      photo,
                       width: double.infinity,
                       height: 200,
                       fit: BoxFit.cover,
@@ -97,7 +293,7 @@ class _CookbookDetailPageState extends State<CookbookDetailPage> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    title, // Dynamic title
+                    title,
                     style: const TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
@@ -105,152 +301,17 @@ class _CookbookDetailPageState extends State<CookbookDetailPage> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    description, // Dynamic description
+                    description,
                     style: const TextStyle(
                       fontSize: 16,
                       color: Colors.grey,
                     ),
                   ),
                   const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        children: const [
-                          Text(
-                            "4.8",
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          Text(
-                            "Ratings",
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey,
-                            ),
-                          ),
-                        ],
-                      ),
-                      Column(
-                        children: [
-                          Text(
-                            "${recipes.length}", // Use updated recipes length
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const Text(
-                            "Recipes",
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  TextField(
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: Colors.grey[200],
-                      hintText: 'Recipe Title, Ingredient',
-                      prefixIcon: const Icon(Icons.search, color: Colors.grey),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  const Text(
-                    "Popular Recipe",
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  if (recipes.isNotEmpty)
-                    GestureDetector(
-                      onTap: () {
-                        // Add navigation to recipe details
-                      },
-                      child: Card(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        elevation: 2,
-                        child: Row(
-                          children: [
-                            ClipRRect(
-                              borderRadius: const BorderRadius.horizontal(
-                                left: Radius.circular(16),
-                              ),
-                              child: Image.asset(
-                                recipes[0]["image"]!,
-                                width: 120,
-                                height: 120,
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    recipes[0]["title"]!,
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Row(
-                                    children: const [
-                                      Icon(Icons.favorite, color: Colors.red, size: 16),
-                                      SizedBox(width: 4),
-                                      Text(
-                                        "4.9 | 103 Reviews",
-                                        style: TextStyle(fontSize: 14, color: Colors.grey),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Row(
-                                    children: [
-                                      const Icon(Icons.timer, size: 16, color: Colors.grey),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        recipes[0]["time"]!,
-                                        style: const TextStyle(fontSize: 14, color: Colors.grey),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      const Icon(Icons.circle, size: 8, color: Colors.grey),
-                                      const SizedBox(width: 8),
-                                      Text(
-                                        recipes[0]["difficulty"]!,
-                                        style: const TextStyle(fontSize: 14, color: Colors.grey),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
                 ],
               ),
             ),
             const SizedBox(height: 24),
-            // All Recipes Section
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Column(
@@ -280,36 +341,23 @@ class _CookbookDetailPageState extends State<CookbookDetailPage> {
                           leading: ClipRRect(
                             borderRadius: BorderRadius.circular(8),
                             child: Image.asset(
-                              recipe["image"]!,
+                              recipe["image"] ?? "assets/images/default_recipe.jpg",
                               width: 60,
                               height: 60,
                               fit: BoxFit.cover,
                             ),
                           ),
                           title: Text(
-                            recipe["title"]!,
+                            recipe["title"] ?? "No Title",
                             style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
                           subtitle: Row(
                             children: [
-                              Text(recipe["time"]!),
+                              Text(recipe["time"] ?? "No Time"),
                               const SizedBox(width: 8),
                               const Icon(Icons.circle, size: 6, color: Colors.grey),
                               const SizedBox(width: 8),
-                              Text(recipe["difficulty"]!),
-                            ],
-                          ),
-                          trailing: PopupMenuButton<String>(
-                            onSelected: (value) {
-                              if (value == "delete") {
-                                _deleteRecipe(index); // Delete the recipe
-                              }
-                            },
-                            itemBuilder: (context) => [
-                              const PopupMenuItem(
-                                value: "delete",
-                                child: Text("Delete"),
-                              ),
+                              Text(recipe["difficulty"] ?? "No Difficulty"),
                             ],
                           ),
                         ),

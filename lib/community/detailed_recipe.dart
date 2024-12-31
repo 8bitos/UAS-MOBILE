@@ -1,222 +1,140 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:uas_cookedex/default_recipe.dart';
 
-class RecipeDetailPage extends StatelessWidget {
-  const RecipeDetailPage({Key? key}) : super(key: key);
+class RecipeDetailPage extends StatefulWidget {
+  final String title;
+  final String image;
+  final String description;
+  final String time;
+  final String difficulty;
+  final List<String> ingredients;
+  final List<String> steps;
+
+  const RecipeDetailPage({
+    Key? key,
+    required this.title,
+    required this.image,
+    required this.description,
+    required this.time,
+    required this.difficulty,
+    required this.ingredients,
+    required this.steps,
+  }) : super(key: key);
+
+  @override
+  _RecipeDetailPageState createState() => _RecipeDetailPageState();
+}
+
+class _RecipeDetailPageState extends State<RecipeDetailPage> {
+  late String title;
+  late String image;
+  late String description;
+  late String time;
+  late String difficulty;
+  late List<String> ingredients;
+  late List<String> steps;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize the fields with the passed values
+    title = widget.title;
+    image = widget.image;
+    description = widget.description;
+    time = widget.time;
+    difficulty = widget.difficulty;
+    ingredients = List<String>.from(widget.ingredients);
+    steps = List<String>.from(widget.steps);
+  }
 
   @override
   Widget build(BuildContext context) {
-    // Retrieve recipe data from arguments or use fallback data
-    final recipe = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>? ?? recipes[0];
-
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
+        title: Text(
+          title,
+          style: const TextStyle(color: Colors.black),
+        ),
         backgroundColor: Colors.white,
-        elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () {
             Navigator.pop(context);
           },
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.favorite_border, color: Colors.orangeAccent),
-            onPressed: () {
-              // Handle favorite action
-            },
-          ),
-        ],
       ),
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          return SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Main Recipe Image
-                if (recipe["image"] != null)
-                  Image.asset(
-                    recipe["image"],
-                    width: double.infinity,
-                    height: constraints.maxHeight * 0.3, // 30% of the screen height
-                    fit: BoxFit.cover,
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Recipe Image
+              image.startsWith('assets/')
+                  ? Image.asset(image, height: 200, width: double.infinity, fit: BoxFit.cover)
+                  : Image.file(File(image), height: 200, width: double.infinity, fit: BoxFit.cover),
+              const SizedBox(height: 16),
+              // Title
+              Text(
+                title,
+                style: GoogleFonts.poppins(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              // Description
+              Text(
+                description,
+                style: GoogleFonts.poppins(fontSize: 16),
+              ),
+              const SizedBox(height: 16),
+              // Cooking Time & Difficulty
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _buildInfoColumn(Icons.timer, "Time", time),
+                  _buildInfoColumn(Icons.star_border, "Difficulty", difficulty),
+                ],
+              ),
+              const SizedBox(height: 16),
+              // Ingredients
+              const Text(
+                "Ingredients",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              ...ingredients.map((ingredient) {
+                return Row(
+                  children: [
+                    const Icon(Icons.check, color: Colors.orangeAccent),
+                    const SizedBox(width: 8),
+                    Text(
+                      ingredient,
+                      style: GoogleFonts.poppins(fontSize: 16),
+                    ),
+                  ],
+                );
+              }).toList(),
+              const SizedBox(height: 16),
+              // Steps
+              const Text(
+                "Steps",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              ...steps.asMap().entries.map((entry) {
+                final index = entry.key + 1;
+                final step = entry.value;
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 8.0),
+                  child: Text(
+                    "$index. $step",
+                    style: GoogleFonts.poppins(fontSize: 16),
                   ),
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Recipe Header
-                      Row(
-                        children: [
-                          const Icon(Icons.book, size: 18, color: Colors.grey),
-                          const SizedBox(width: 4),
-                          Expanded(
-                            child: Text(
-                              "Cookbooks / ${recipe["title"]}",
-                              style: GoogleFonts.poppins(
-                                fontSize: 14,
-                                color: Colors.grey,
-                              ),
-                              overflow: TextOverflow.ellipsis, // Prevent text overflow
-                            ),
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.add, color: Colors.orangeAccent),
-                            onPressed: () {
-                              // Handle add action
-                            },
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        recipe["title"] ?? "No Title",
-                        style: GoogleFonts.poppins(fontSize: 24, fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          const Icon(Icons.favorite, color: Colors.red, size: 16),
-                          const SizedBox(width: 4),
-                          Text(
-                            "${recipe["likes"] ?? 0}",
-                            style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold),
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            " | ${recipe["reviews"] ?? "0 Reviews"}",
-                            style: GoogleFonts.poppins(fontSize: 16, color: Colors.grey),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      // Time, Difficulty, Serves
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          _buildInfoColumn(Icons.timer, recipe["time"] ?? "N/A"),
-                          _buildInfoColumn(Icons.star_border, recipe["difficulty"] ?? "N/A"),
-                          _buildInfoColumn(Icons.restaurant, recipe["serves"] ?? "N/A"),
-                        ],
-                      ),
-                      const SizedBox(height: 24),
-                      // Reviews Section
-                      Card(
-                        margin: const EdgeInsets.symmetric(vertical: 8),
-                        elevation: 2,
-                        child: Column(
-                          children: [
-                            ListTile(
-                              leading: const CircleAvatar(
-                                backgroundImage: AssetImage('assets/images/user1.jpg'),
-                              ),
-                              title: Text(
-                                "Review by User",
-                                style: GoogleFonts.poppins(),
-                              ),
-                              subtitle: const Text("This recipe is amazing!"),
-                            ),
-                            Align(
-                              alignment: Alignment.centerRight,
-                              child: TextButton(
-                                onPressed: () {
-                                  Navigator.pushNamed(
-                                    context,
-                                    '/reviews',
-                                    arguments: recipe['reviewsList'] ?? [],
-                                  );
-                                },
-                                child: const Text(
-                                  "READ ALL",
-                                  style: TextStyle(color: Colors.orangeAccent),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      // Tab Section (Intro, Ingredients, Steps)
-                      DefaultTabController(
-                        length: 3,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            TabBar(
-                              labelColor: Colors.orangeAccent,
-                              unselectedLabelColor: Colors.grey,
-                              labelStyle: GoogleFonts.poppins(fontWeight: FontWeight.bold),
-                              indicatorColor: Colors.orangeAccent,
-                              tabs: const [
-                                Tab(text: "Intro"),
-                                Tab(text: "Ingredients"),
-                                Tab(text: "Steps"),
-                              ],
-                            ),
-                            const SizedBox(height: 16),
-                            SizedBox(
-                              height: 300,
-                              child: TabBarView(
-                                children: [
-                                  // Intro Tab
-                                  SingleChildScrollView(
-                                    child: Text(
-                                      recipe["description"] ?? "No Description Available",
-                                      style: GoogleFonts.poppins(fontSize: 16, height: 1.5),
-                                    ),
-                                  ),
-                                  // Ingredients Tab
-                                  SingleChildScrollView(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: List.generate(
-                                        (recipe["ingredients"] as List<dynamic>).length,
-                                        (index) => Row(
-                                          children: [
-                                            const Icon(Icons.circle, size: 8, color: Colors.orangeAccent),
-                                            const SizedBox(width: 8),
-                                            Text(
-                                              recipe["ingredients"][index],
-                                              style: GoogleFonts.poppins(),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  // Steps Tab
-                                  SingleChildScrollView(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: List.generate(
-                                        (recipe["steps"] as List<dynamic>).length,
-                                        (index) => Padding(
-                                          padding: const EdgeInsets.only(bottom: 8.0),
-                                          child: Text(
-                                            "${index + 1}. ${recipe["steps"][index]}",
-                                            style: GoogleFonts.poppins(fontSize: 16),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          );
-        },
+                );
+              }).toList(),
+            ],
+          ),
+        ),
       ),
       bottomNavigationBar: BottomAppBar(
         color: Colors.white,
@@ -225,26 +143,48 @@ class RecipeDetailPage extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            IconButton(
-              icon: const Icon(Icons.edit, color: Colors.orangeAccent),
-              onPressed: () {
-                Navigator.pushNamed(
-                  context,
-                  '/edit-recipe',
-                  arguments: {"recipe": recipe},
-                );
+           IconButton(
+          icon: const Icon(Icons.edit, color: Colors.orangeAccent),
+          onPressed: () async {
+            final updatedRecipe = await Navigator.pushNamed(
+              context,
+              '/edit-recipe',
+              arguments: {
+                'recipe': {
+                  'title': title,
+                  'image': image,
+                  'description': description,
+                  'time': time,
+                  'difficulty': difficulty,
+                  'ingredients': ingredients,
+                  'steps': steps,
+                },
               },
-            ),
+            );
+
+            if (updatedRecipe != null) {
+              final updatedRecipeMap = updatedRecipe as Map<String, dynamic>;
+              setState(() {
+                title = updatedRecipeMap['title'];
+                image = updatedRecipeMap['image'];
+                description = updatedRecipeMap['description'];
+                time = "${updatedRecipeMap['cookTimeHours']}h ${updatedRecipeMap['cookTimeMinutes']}m";
+                difficulty = updatedRecipeMap['difficulty'];
+                ingredients = List<String>.from(updatedRecipeMap['ingredients']);
+                steps = List<String>.from(updatedRecipeMap['steps']);
+              });
+            }
+          },
+        ),
             IconButton(
               icon: const Icon(Icons.shopping_cart, color: Colors.orangeAccent),
               onPressed: () {
-                final ingredients = (recipe["ingredients"] as List<dynamic>)
-                    .map((item) => {"name": item, "checked": false})
-                    .toList();
                 Navigator.pushNamed(
                   context,
                   '/grocery-list',
-                  arguments: ingredients,
+                  arguments: ingredients.map((ingredient) {
+                    return {'name': ingredient, 'checked': false};
+                  }).toList(),
                 );
               },
             ),
@@ -254,14 +194,18 @@ class RecipeDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoColumn(IconData icon, String text) {
+  Widget _buildInfoColumn(IconData icon, String label, String value) {
     return Column(
       children: [
-        Icon(icon, color: Colors.orangeAccent, size: 20),
-        const SizedBox(height: 8),
+        Icon(icon, size: 32, color: Colors.orangeAccent),
+        const SizedBox(height: 4),
         Text(
-          text,
-          style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.bold),
+          label,
+          style: const TextStyle(fontSize: 14, color: Colors.grey),
+        ),
+        Text(
+          value,
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
       ],
     );

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 
 class CookbookEditPage extends StatefulWidget {
   final String photo;
@@ -6,11 +8,11 @@ class CookbookEditPage extends StatefulWidget {
   final String description;
 
   const CookbookEditPage({
-    Key? key,
+    super.key,
     required this.photo,
     required this.title,
     required this.description,
-  }) : super(key: key);
+  });
 
   @override
   State<CookbookEditPage> createState() => _CookbookEditPageState();
@@ -19,25 +21,33 @@ class CookbookEditPage extends StatefulWidget {
 class _CookbookEditPageState extends State<CookbookEditPage> {
   late TextEditingController _titleController;
   late TextEditingController _descriptionController;
-  String? _selectedImage;
+  String? _selectedImage; // Image file path
+  final ImagePicker _picker = ImagePicker(); // Image picker instance
 
   @override
   void initState() {
     super.initState();
     _titleController = TextEditingController(text: widget.title);
     _descriptionController = TextEditingController(text: widget.description);
-    _selectedImage = widget.photo;
+    _selectedImage = widget.photo; // Initialize with the provided photo
   }
 
-  void _changePhoto() async {
-    setState(() {
-      _selectedImage = 'assets/images/cookbook2.jpg'; // Replace with a new image
-    });
+  Future<void> _changePhoto() async {
+    // Show options to choose image source
+    final XFile? pickedImage = await _picker.pickImage(
+      source: ImageSource.gallery, // or ImageSource.camera
+    );
+
+    if (pickedImage != null) {
+      setState(() {
+        _selectedImage = pickedImage.path; // Update selected image path
+      });
+    }
   }
 
   void _saveChanges() {
     Navigator.pop(context, {
-      'photo': _selectedImage,
+      'photo': _selectedImage, // Pass the updated photo
       'title': _titleController.text,
       'description': _descriptionController.text,
     });
@@ -82,18 +92,25 @@ class _CookbookEditPageState extends State<CookbookEditPage> {
             children: [
               // Change Photo Section
               GestureDetector(
-                onTap: _changePhoto,
+                onTap: _changePhoto, // Trigger the image picker
                 child: Stack(
                   alignment: Alignment.bottomRight,
                   children: [
                     ClipRRect(
                       borderRadius: BorderRadius.circular(16),
-                      child: Image.asset(
-                        _selectedImage!,
-                        width: double.infinity,
-                        height: 200,
-                        fit: BoxFit.cover,
-                      ),
+                      child: _selectedImage != null && _selectedImage!.isNotEmpty
+                        ? Image.file(
+                            File(_selectedImage!), // Display selected image
+                            width: double.infinity,
+                            height: 200,
+                            fit: BoxFit.cover,
+                          )
+                        : Image.asset(
+                            'assets/cookbook/cookbook.jpg', // Fallback image
+                            width: double.infinity,
+                            height: 200,
+                            fit: BoxFit.cover,
+                          ),
                     ),
                     Container(
                       padding: const EdgeInsets.all(8),
@@ -146,28 +163,6 @@ class _CookbookEditPageState extends State<CookbookEditPage> {
                 ),
               ),
               const SizedBox(height: 24),
-              // Add Recipe Section
-              const Text(
-                "Add Recipes",
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton.icon(
-                onPressed: () {
-                  // Add new recipe logic here
-                },
-                icon: const Icon(Icons.add, color: Colors.white),
-                label: const Text("Add Recipe"),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orangeAccent,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-              ),
             ],
           ),
         ),

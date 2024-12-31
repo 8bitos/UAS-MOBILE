@@ -186,8 +186,8 @@ class _AuthScreenState extends State<AuthScreen> {
                       ),
                       const SizedBox(height: 16),
                       // OR Divider
-                      Row(
-                        children: const [
+                      const Row(
+                        children: [
                           Expanded(
                             child: Divider(
                               color: Colors.grey,

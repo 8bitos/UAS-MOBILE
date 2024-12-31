@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import 'package:image_picker/image_picker.dart';
 
 class EditProfilePage extends StatefulWidget {
-  final Map<String, dynamic> initialData; // Terima data awal dari halaman profil
+  final Map<String, dynamic> initialData; // Accept initial data from AccountPage
 
   const EditProfilePage({Key? key, required this.initialData}) : super(key: key);
 
   @override
-  State<EditProfilePage> createState() => _EditProfilePageState();
+  _EditProfilePageState createState() => _EditProfilePageState();
 }
 
 class _EditProfilePageState extends State<EditProfilePage> {
@@ -16,104 +16,84 @@ class _EditProfilePageState extends State<EditProfilePage> {
   File? _profileImage;
   File? _bannerImage;
 
-  // Form controllers
   late TextEditingController _nameController;
-  late TextEditingController _emailController;
-  late TextEditingController _phoneController;
   late TextEditingController _bioController;
-  late TextEditingController _passwordController;
+
+  int nameCharCount = 0;
+  int bioCharCount = 0;
 
   @override
   void initState() {
     super.initState();
-    // Isi dengan data awal dari `initialData`
-    _nameController = TextEditingController(text: widget.initialData['name'] ?? '');
-    _emailController = TextEditingController(text: widget.initialData['email'] ?? '');
-    _phoneController = TextEditingController(text: widget.initialData['phone'] ?? '');
-    _bioController = TextEditingController(text: widget.initialData['bio'] ?? '');
-    _passwordController = TextEditingController(); // Kosongkan password
-  }
+    _nameController = TextEditingController(text: widget.initialData['name']);
+    _bioController = TextEditingController(text: widget.initialData['bio']);
 
-  // Pilih foto profil
-  Future<void> _pickImage() async {
-    final ImagePicker picker = ImagePicker();
-    final XFile? pickedImage = await picker.pickImage(source: ImageSource.gallery);
+    nameCharCount = _nameController.text.length;
+    bioCharCount = _bioController.text.length;
 
-    if (pickedImage != null) {
+    _nameController.addListener(() {
       setState(() {
-        _profileImage = File(pickedImage.path);
+        nameCharCount = _nameController.text.length;
       });
-    }
+    });
+
+    _bioController.addListener(() {
+      setState(() {
+        bioCharCount = _bioController.text.length;
+      });
+    });
   }
 
-  // Pilih foto banner
-  Future<void> _pickBannerImage() async {
-    final ImagePicker picker = ImagePicker();
-    final XFile? pickedImage = await picker.pickImage(source: ImageSource.gallery);
+  Future<void> _pickImage({required bool isProfile}) async {
+    final picker = ImagePicker();
+    final pickedImage = await picker.pickImage(source: ImageSource.gallery);
 
     if (pickedImage != null) {
       setState(() {
-        _bannerImage = File(pickedImage.path);
+        if (isProfile) {
+          _profileImage = File(pickedImage.path);
+        } else {
+          _bannerImage = File(pickedImage.path);
+        }
       });
     }
   }
 
   void _saveChanges() {
     if (_formKey.currentState!.validate()) {
-      // Data baru yang akan disimpan
-      final updatedProfile = {
+      final updatedData = {
         'name': _nameController.text,
-        'email': _emailController.text,
-        'phone': _phoneController.text,
         'bio': _bioController.text,
-        'profileImage': _profileImage,
-        'bannerImage': _bannerImage,
+        'profileImage': _profileImage?.path ?? widget.initialData['profileImage'],
+        'coverImage': _bannerImage?.path ?? widget.initialData['coverImage'],
       };
 
-      // Kirim data baru ke halaman profil dan kembali
-      Navigator.pop(context, updatedProfile); // Pop dengan data terbaru
+      Navigator.pop(context, updatedData); // Pass updated data back to AccountPage
     }
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Colors.white,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () {
-            Navigator.pop(context); // Kembali tanpa menyimpan
-          },
-        ),
-        title: const Text(
-          "Edit Profile",
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: _saveChanges, // Simpan perubahan
-            child: const Text(
-              "Save",
-              style: TextStyle(color: Colors.orangeAccent),
-            ),
-          ),
-        ],
+Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: AppBar(
+      backgroundColor: Colors.white,
+      elevation: 0,
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back, color: Colors.black),
+        onPressed: () => Navigator.pop(context),
       ),
-      body: Container(
-        color: Colors.white,
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Form(
-            key: _formKey,
+      title: const Text("Edit Profile", style: TextStyle(color: Colors.black)),
+    ),
+    body: Form(
+      key: _formKey,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
             child: ListView(
+              padding: const EdgeInsets.all(16),
               children: [
-                // Banner Section
+                // Cover Photo
                 Center(
                   child: Stack(
                     children: [
@@ -125,7 +105,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                           image: DecorationImage(
                             image: _bannerImage != null
                                 ? FileImage(_bannerImage!)
-                                : const AssetImage('assets/images/profile_cover.png') as ImageProvider,
+                                : FileImage(File(widget.initialData['coverImage'])),
                             fit: BoxFit.cover,
                           ),
                         ),
@@ -134,12 +114,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
                         bottom: 8,
                         right: 8,
                         child: TextButton.icon(
-                          onPressed: _pickBannerImage,
+                          onPressed: () => _pickImage(isProfile: false),
                           icon: const Icon(Icons.camera_alt, color: Colors.white),
-                          label: const Text(
-                            "Edit Banner",
-                            style: TextStyle(color: Colors.white),
-                          ),
+                          label: const Text("Edit Banner", style: TextStyle(color: Colors.white)),
                           style: TextButton.styleFrom(
                             backgroundColor: Colors.black.withOpacity(0.5),
                           ),
@@ -148,107 +125,92 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     ],
                   ),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 16),
 
-                // Profile Picture Section
+                // Profile Photo
                 Center(
                   child: Column(
                     children: [
-                      CircleAvatar(
-                        radius: 50,
-                        backgroundImage: _profileImage != null
-                            ? FileImage(_profileImage!)
-                            : const AssetImage('assets/images/profile.png') as ImageProvider,
+                      Stack(
+                        children: [
+                          CircleAvatar(
+                            radius: 50,
+                            backgroundImage: _profileImage != null
+                                ? FileImage(_profileImage!)
+                                : FileImage(File(widget.initialData['profileImage'])),
+                          ),
+                          Positioned(
+                            bottom: 0,
+                            right: 0,
+                            child: IconButton(
+                              onPressed: () => _pickImage(isProfile: true),
+                              icon: const Icon(Icons.camera_alt, color: Colors.orangeAccent),
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 12),
-                      TextButton.icon(
-                        onPressed: _pickImage,
-                        icon: const Icon(Icons.camera_alt, color: Colors.orangeAccent),
-                        label: const Text(
-                          "Edit Photo",
-                          style: TextStyle(color: Colors.orangeAccent),
-                        ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        "Edit Photo",
+                        style: TextStyle(color: Colors.orangeAccent),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 16),
 
-                // Form Fields
+                // Name Field
                 TextFormField(
                   controller: _nameController,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: "Profile Name",
-                    border: OutlineInputBorder(),
                   ),
+                  maxLength: 24,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return "Please enter your name.";
+                      return "Name cannot be empty";
+                    }
+                    if (value.length > 24) {
+                      return "Name must not exceed 24 characters";
                     }
                     return null;
                   },
                 ),
                 const SizedBox(height: 16),
-                TextFormField(
-                  controller: _emailController,
-                  decoration: const InputDecoration(
-                    labelText: "Email",
-                    border: OutlineInputBorder(),
-                  ),
-                  keyboardType: TextInputType.emailAddress,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return "Please enter your email.";
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _phoneController,
-                  decoration: const InputDecoration(
-                    labelText: "Phone Number",
-                    border: OutlineInputBorder(),
-                  ),
-                  keyboardType: TextInputType.phone,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return "Please enter your phone number.";
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
+
+                // Bio Field
                 TextFormField(
                   controller: _bioController,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: "Bio",
-                    border: OutlineInputBorder(),
                   ),
+                  maxLength: 100,
                   maxLines: 3,
+                  validator: (value) {
+                    if (value != null && value.length > 100) {
+                      return "Bio must not exceed 100 characters";
+                    }
+                    return null;
+                  },
                 ),
-                const SizedBox(height: 32),
-
-                // Save Button
-                ElevatedButton(
-                  onPressed: _saveChanges,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.orangeAccent,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                  ),
-                  child: const Text(
-                    "Save Changes",
-                    style: TextStyle(fontSize: 16, color: Colors.white),
-                  ),
-                ),
+                const SizedBox(height: 16),
               ],
             ),
           ),
-        ),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: ElevatedButton(
+              onPressed: _saveChanges,
+              child: const Text("Save"),
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size(double.infinity, 50), // Full width button
+                backgroundColor: Colors.orangeAccent,
+              ),
+            ),
+          ),
+        ],
       ),
-    );
-  }
+    ),
+  );
+}
 }
