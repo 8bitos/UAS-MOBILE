@@ -85,10 +85,13 @@ class MyApp extends StatelessWidget {
           );
         },
         '/reviews': (context) {
-          final args = ModalRoute.of(context)?.settings.arguments as List<dynamic>;
-          final reviews = args.cast<Map<String, String>>(); // Safely cast to the correct type
-          return ReviewsPage(reviews: reviews);
-        },
+            final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>;
+            return ReviewsPage(
+              recipeTitle: args['recipeTitle'] as String,
+              rating: args['rating'] as double,
+              reviews: List<Map<String, dynamic>>.from(args['reviews']),
+            );
+          },
         '/grocery-list': (context) {
           final ingredients = ModalRoute.of(context)!.settings.arguments as List<Map<String, dynamic>>;
           return GroceryListPage(initialIngredients: ingredients);
@@ -128,7 +131,7 @@ class MyApp extends StatelessWidget {
                 !args.containsKey('ingredients') ||
                 !args.containsKey('steps')) {
               return MaterialPageRoute(
-                builder: (context) => Scaffold(
+                builder: (context) => const Scaffold(
                   body: Center(
                     child: Text(
                       "Invalid recipe data provided!",
@@ -149,9 +152,9 @@ class MyApp extends StatelessWidget {
                 difficulty: args['difficulty'] as String,
                 ingredients: List<String>.from(args['ingredients']),
                 steps: List<String>.from(args['steps']),
+                category: args['category'] as String? ?? 'Everyday', // Tambahkan kategori dengan default value
               ),
             );
-
           case '/cookbook-detail':
             final args = settings.arguments as Map<String, dynamic>?;
 

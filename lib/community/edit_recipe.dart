@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart'; // Tambahkan ini
+import '../provider/user_provider.dart';
 import 'dart:io';
 
 class EditRecipePage extends StatefulWidget {
@@ -19,11 +21,13 @@ class _EditRecipePageState extends State<EditRecipePage> {
   late int difficulty; // Use integer for star rating
   late String cookTimeMinutes;
   late String cookTimeHours;
+  late String selectedCategory;
   File? _recipeImage;
 
   @override
   void initState() {
     super.initState();
+    selectedCategory = widget.recipe['category'] ?? 'Everyday';
     titleController = TextEditingController(text: widget.recipe['title']);
     descriptionController = TextEditingController(text: widget.recipe['description']);
     ingredients = List<String>.from(widget.recipe['ingredients'] ?? []);
@@ -67,20 +71,26 @@ class _EditRecipePageState extends State<EditRecipePage> {
   }
 
   void _saveRecipe() {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    
     final updatedRecipe = {
       'title': titleController.text,
       'description': descriptionController.text,
       'ingredients': ingredients,
       'steps': steps,
-      'difficulty': difficulty == 1
-          ? 'Easy'
-          : difficulty == 2
-              ? 'Medium'
-              : 'Hard', // Map back to string
+      'difficulty': difficulty == 1 ? 'Easy' : difficulty == 2 ? 'Medium' : 'Hard',
+      'time': "${cookTimeHours}h ${cookTimeMinutes}m",
       'cookTimeMinutes': cookTimeMinutes,
       'cookTimeHours': cookTimeHours,
-      'image': _recipeImage?.path ?? widget.recipe['image'], // Save selected image path or fallback
+      'image': _recipeImage?.path ?? widget.recipe['image'],
+      'category': selectedCategory,
+      'author': userProvider.name, // Pastikan author tetap ada
     };
+
+    // Update recipe di provider
+    userProvider.updateRecipe(widget.recipe['title'], updatedRecipe);
+    
+    // Kembalikan data yang diupdate
     Navigator.pop(context, updatedRecipe);
   }
 
@@ -150,6 +160,28 @@ class _EditRecipePageState extends State<EditRecipePage> {
               controller: descriptionController,
               decoration: const InputDecoration(labelText: 'Description'),
             ),
+            const SizedBox(height: 16),
+            const Text('Category:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              DropdownButtonFormField<String>(
+                value: selectedCategory,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                ),
+                items: const [
+                  DropdownMenuItem(value: 'Seasonal', child: Text('Seasonal')),
+                  DropdownMenuItem(value: 'Cakes', child: Text('Cakes')),
+                  DropdownMenuItem(value: 'Everyday', child: Text('Everyday')),
+                  DropdownMenuItem(value: 'Drinks', child: Text('Drinks')),
+                ],
+                onChanged: (String? newValue) {
+                  if (newValue != null) {
+                    setState(() {
+                      selectedCategory = newValue;
+                    });
+                  }
+                },
+              ),
             const SizedBox(height: 16),
             // Cooking Time
               const Text('Cooking Time:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),

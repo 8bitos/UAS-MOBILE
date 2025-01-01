@@ -186,6 +186,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
+  String? selectedCategory;
 
   // Define recent searches and last seen recipes
   final List<String> _recentSearches = ["Sayur", "Ayam", "Gulai"];
@@ -266,7 +267,8 @@ class _HomePageState extends State<HomePage> {
                 // Add to userProvider's userCookbooks list with an ID
                 userProvider.addCookbook({
                   "id": DateTime.now().toString(), // Add unique ID
-                  "image": "assets/cookbook/cookbook.jpg",
+                  "image": "assets/images/cookbook.jpg",
+                  "fallbackImage": "assets/images/default_recipe.jpg",
                   "title": title!,
                   "description": description!,
                   "recipes": [], // Initialize empty recipes array
@@ -317,31 +319,49 @@ class _HomePageState extends State<HomePage> {
  
 
   Widget _buildCategoryItem(String imagePath, String title) {
-    return Padding(
+  bool isSelected = selectedCategory == title;
+  return GestureDetector(
+    onTap: () {
+      setState(() {
+        selectedCategory = isSelected ? null : title;
+      });
+    },
+    child: Padding(
       padding: const EdgeInsets.only(right: 8.0),
       child: Column(
         children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: Image.asset(
-              imagePath,
-              width: 80,
-              height: 80,
-              fit: BoxFit.cover,
+          Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: isSelected ? Colors.orangeAccent : Colors.transparent,
+                width: 2,
+              ),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Image.asset(
+                imagePath,
+                width: 80,
+                height: 80,
+                fit: BoxFit.cover,
+              ),
             ),
           ),
           const SizedBox(height: 8),
           Text(
             title,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w500,
+              color: isSelected ? Colors.orangeAccent : Colors.black,
             ),
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 
   
     @override
@@ -571,73 +591,78 @@ body: SingleChildScrollView(
                       color: Colors.grey,
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  ...recipes.map((communityRecipe) {
-                    // Find the corresponding recipe in the full recipes list by matching titles
-                    final matchingRecipe = recipes.firstWhere(
-                      (recipe) => recipe['title'] == communityRecipe['title'], // Match by title
-                      orElse: () => {}, // Fallback in case no match is found
-                    );
-
-                    return GestureDetector(
-                      onTap: () {
-                        Navigator.pushNamed(
-                          context,
-                          '/recipe-detail',
-                          arguments: matchingRecipe, // Pass the matched recipe
-                        );
-                      },
-                      child: Card(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Image.asset(
-                              communityRecipe["image"]!,
-                              fit: BoxFit.cover,
-                              width: double.infinity,
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(16.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    communityRecipe["title"]!,
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Row(
-                                    children: [
-                                      Text(
-                                        "by ${communityRecipe["author"]}",
-                                        style: const TextStyle(
-                                          fontSize: 14,
-                                          color: Colors.grey,
-                                        ),
-                                      ),
-                                      const Spacer(),
-                                      Text(
-                                        "${communityRecipe["likes"]} Likes",
-                                        style: const TextStyle(
-                                          fontSize: 14,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
+                  ...recipes.where((recipe) {
+                  if (selectedCategory == null) return true;
+                  return recipe['category'] == selectedCategory;
+                }).map((communityRecipe) {
+                  return GestureDetector(
+                    onTap: () {
+                      Navigator.pushNamed(
+                        context,
+                        '/recipe-detail',
+                        arguments: {
+                          'title': communityRecipe['title'],
+                          'image': communityRecipe['image'],
+                          'description': communityRecipe['description'],
+                          'time': communityRecipe['time'],
+                          'difficulty': communityRecipe['difficulty'],
+                          'ingredients': communityRecipe['ingredients'] ?? [],
+                          'steps': communityRecipe['steps'] ?? [],
+                          'category': communityRecipe['category'] ?? 'Everyday',
+                        },
+                      );
+                    },
+                    child: Card(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
                       ),
-                    );
-                  }),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Image.asset(
+                            communityRecipe["image"]!,
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  communityRecipe["title"]!,
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Row(
+                                  children: [
+                                    Text(
+                                      "by ${communityRecipe["author"]}",
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+                                    const Spacer(),
+                                    Text(
+                                      "${communityRecipe["likes"]} Likes",
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }).toList(),
                   const SizedBox(height: 8),
                   GestureDetector(
                     onTap: () {

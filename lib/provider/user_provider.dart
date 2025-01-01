@@ -4,6 +4,7 @@ import '../provider/notification_service.dart';
 class UserProvider with ChangeNotifier {
   String _name = "Nararaya Kirana";
   String _bio = "Rajin menabung dan suka memasak";
+  String _profileImage = "assets/images/profile.png";
 
   // Data for cookbooks and recipes
   List<Map<String, dynamic>> _userCookbooks = [];
@@ -16,6 +17,7 @@ class UserProvider with ChangeNotifier {
   // Getters yang sudah ada
   String get name => _name;
   String get bio => _bio;
+  String get profileImage => _profileImage;
   List<Map<String, dynamic>> get userCookbooks => _userCookbooks;
   List<Map<String, dynamic>> get userRecipes => _userRecipes;
   
@@ -54,13 +56,26 @@ class UserProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void updateRecipe(Map<String, dynamic> oldRecipe, Map<String, dynamic> updatedRecipe) {
-    final index = _userRecipes.indexOf(oldRecipe);
+  void updateRecipe(String title, Map<String, dynamic> updatedRecipe) {
+    final index = _userRecipes.indexWhere((recipe) => recipe['title'] == title);
     if (index != -1) {
-      _userRecipes[index] = updatedRecipe;
+      // Update resep dengan mempertahankan data yang tidak diubah
+      _userRecipes[index] = {
+        ..._userRecipes[index], // Pertahankan data lama
+        'title': updatedRecipe['title'],
+        'description': updatedRecipe['description'],
+        'ingredients': updatedRecipe['ingredients'],
+        'steps': updatedRecipe['steps'],
+        'difficulty': updatedRecipe['difficulty'],
+        'time': updatedRecipe['time'],
+        'category': updatedRecipe['category'],
+        'image': updatedRecipe['image'],
+        'author': updatedRecipe['author'],
+      };
       notifyListeners();
     }
   }
+
 
   void editCookbook(int index, Map<String, dynamic> updatedCookbook) {
     _userCookbooks[index] = updatedCookbook;
@@ -79,6 +94,8 @@ class UserProvider with ChangeNotifier {
     );
     notifyListeners();
   }
+
+  
 
   void addRecipe(Map<String, dynamic> recipe) {
     _userRecipes.add(recipe);

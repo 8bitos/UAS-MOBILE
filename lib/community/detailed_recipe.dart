@@ -1,7 +1,9 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import '../home/review_dialog.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+import '../provider/user_provider.dart';
+import '../home/review_dialog.dart';
 
 class RecipeDetailPage extends StatefulWidget {
   final String title;
@@ -11,6 +13,7 @@ class RecipeDetailPage extends StatefulWidget {
   final String difficulty;
   final List<String> ingredients;
   final List<String> steps;
+  final String category;
 
   const RecipeDetailPage({
     Key? key,
@@ -21,6 +24,7 @@ class RecipeDetailPage extends StatefulWidget {
     required this.difficulty,
     required this.ingredients,
     required this.steps,
+    required this.category,
   }) : super(key: key);
 
   @override
@@ -35,6 +39,7 @@ class _RecipeDetailPageState extends State<RecipeDetailPage> {
   late String difficulty;
   late List<String> ingredients;
   late List<String> steps;
+  late String category;
 
   @override
   void initState() {
@@ -47,6 +52,24 @@ class _RecipeDetailPageState extends State<RecipeDetailPage> {
     difficulty = widget.difficulty;
     ingredients = List<String>.from(widget.ingredients);
     steps = List<String>.from(widget.steps);
+    category = widget.category;
+  }
+
+  Widget _buildInfoColumn(IconData icon, String label, String value) {
+    return Column(
+      children: [
+        Icon(icon, size: 32, color: Colors.orangeAccent),
+        const SizedBox(height: 4),
+        Text(
+          label,
+          style: const TextStyle(fontSize: 14, color: Colors.grey),
+        ),
+        Text(
+          value,
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+      ],
+    );
   }
 
   @override
@@ -71,24 +94,20 @@ class _RecipeDetailPageState extends State<RecipeDetailPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Recipe Image
               image.startsWith('assets/')
                   ? Image.asset(image, height: 200, width: double.infinity, fit: BoxFit.cover)
                   : Image.file(File(image), height: 200, width: double.infinity, fit: BoxFit.cover),
               const SizedBox(height: 16),
-              // Title
               Text(
                 title,
                 style: GoogleFonts.poppins(fontSize: 24, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
-              // Description
               Text(
                 description,
                 style: GoogleFonts.poppins(fontSize: 16),
               ),
               const SizedBox(height: 16),
-              // Cooking Time & Difficulty
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -97,7 +116,21 @@ class _RecipeDetailPageState extends State<RecipeDetailPage> {
                 ],
               ),
               const SizedBox(height: 16),
-              // Ingredients
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.orangeAccent.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  category,
+                  style: const TextStyle(
+                    color: Colors.orangeAccent,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
               const Text(
                 "Ingredients",
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -116,7 +149,6 @@ class _RecipeDetailPageState extends State<RecipeDetailPage> {
                 );
               }).toList(),
               const SizedBox(height: 16),
-              // Steps
               const Text(
                 "Steps",
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -144,45 +176,126 @@ class _RecipeDetailPageState extends State<RecipeDetailPage> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-           IconButton(
-          icon: const Icon(Icons.edit, color: Colors.orangeAccent),
-          onPressed: () async {
-            final updatedRecipe = await Navigator.pushNamed(
-              context,
-              '/edit-recipe',
-              arguments: {
-                'recipe': {
-                  'title': title,
-                  'image': image,
-                  'description': description,
-                  'time': time,
-                  'difficulty': difficulty,
-                  'ingredients': ingredients,
-                  'steps': steps,
-                },
-              },
-            );
+            IconButton(
+              icon: const Icon(Icons.edit, color: Colors.orangeAccent),
+              onPressed: () async {
+                final updatedRecipe = await Navigator.pushNamed(
+                  context,
+                  '/edit-recipe',
+                  arguments: {
+                    'recipe': {
+                      'title': title,
+                      'image': image,
+                      'description': description,
+                      'time': time,
+                      'difficulty': difficulty,
+                      'ingredients': ingredients,
+                      'steps': steps,
+                      'category': category,
+                    },
+                  },
+                );
 
-            if (updatedRecipe != null) {
-              final updatedRecipeMap = updatedRecipe as Map<String, dynamic>;
-              setState(() {
-                title = updatedRecipeMap['title'];
-                image = updatedRecipeMap['image'];
-                description = updatedRecipeMap['description'];
-                time = "${updatedRecipeMap['cookTimeHours']}h ${updatedRecipeMap['cookTimeMinutes']}m";
-                difficulty = updatedRecipeMap['difficulty'];
-                ingredients = List<String>.from(updatedRecipeMap['ingredients']);
-                steps = List<String>.from(updatedRecipeMap['steps']);
-              });
-            }
-          },
+                if (updatedRecipe != null) {
+                  final updatedRecipeMap = updatedRecipe as Map<String, dynamic>;
+                  setState(() {
+                    title = updatedRecipeMap['title'];
+                    image = updatedRecipeMap['image'];
+                    description = updatedRecipeMap['description'];
+                    time = "${updatedRecipeMap['cookTimeHours']}h ${updatedRecipeMap['cookTimeMinutes']}m";
+                    difficulty = updatedRecipeMap['difficulty'];
+                    ingredients = List<String>.from(updatedRecipeMap['ingredients']);
+                    steps = List<String>.from(updatedRecipeMap['steps']);
+                    category = updatedRecipeMap['category'];
+                  });
+                }
+              },
+            ),
+           // Add this to the bottom navigation bar in RecipeDetailPage:
+IconButton(
+  icon: const Icon(Icons.rate_review, color: Colors.orangeAccent),
+  onPressed: () {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final userReviews = userProvider.userReviews
+        .where((review) => review['recipeTitle'] == title)
+        .toList();
+    
+    double averageRating = 0;
+    if (userReviews.isNotEmpty) {
+      averageRating = userReviews
+          .map((review) => review['rating'] as double)
+          .reduce((a, b) => a + b) / userReviews.length;
+    }
+    
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context); // Close bottom sheet
+                    // Navigate to reviews page
+                    Navigator.pushNamed(
+                      context,
+                      '/reviews',
+                      arguments: {
+                        'recipeTitle': title,
+                        'rating': averageRating,
+                        'reviews': userReviews,
+                      },
+                    );
+                  },
+                  child: Text(
+                    'See All Reviews (${userReviews.length})',
+                    style: const TextStyle(color: Colors.orange),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ],
+            ),
+            const Divider(),
+            Padding(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom,
+                top: 8,
+              ),
+              child: TextField(
+                decoration: const InputDecoration(
+                  hintText: 'Add a review...',
+                  border: OutlineInputBorder(),
+                ),
+                maxLines: 3,
+                onTap: () {
+                  Navigator.pop(context); // Close bottom sheet
+                  // Navigate to reviews page
+                  Navigator.pushNamed(
+                    context,
+                    '/reviews',
+                    arguments: {
+                      'recipeTitle': title,
+                      'rating': averageRating,
+                      'reviews': userReviews,
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
         ),
-        IconButton(
-        icon: const Icon(Icons.rate_review, color: Colors.orangeAccent),
-        onPressed: () {
-          showReviewDialog(context, title);
-        },
       ),
+    );
+  },
+),
             IconButton(
               icon: const Icon(Icons.shopping_cart, color: Colors.orangeAccent),
               onPressed: () {
@@ -198,23 +311,6 @@ class _RecipeDetailPageState extends State<RecipeDetailPage> {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildInfoColumn(IconData icon, String label, String value) {
-    return Column(
-      children: [
-        Icon(icon, size: 32, color: Colors.orangeAccent),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: const TextStyle(fontSize: 14, color: Colors.grey),
-        ),
-        Text(
-          value,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        ),
-      ],
     );
   }
 }

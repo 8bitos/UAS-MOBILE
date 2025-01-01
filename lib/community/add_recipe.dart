@@ -19,6 +19,7 @@ class _AddRecipePageState extends State<AddRecipePage> {
   String? cookTimeHours;
   List<String> ingredients = [];
   List<String> steps = [];
+  String selectedCategory = 'Everyday'; 
   File? _selectedImage; // To store the selected image file
 
   final ImagePicker _picker = ImagePicker();
@@ -67,6 +68,7 @@ class _AddRecipePageState extends State<AddRecipePage> {
       "steps": steps,
       "difficulty": "Medium",
       "author": userProvider.name,
+      "category": selectedCategory,
     };
 
     // Add the new recipe
@@ -206,6 +208,21 @@ class _AddRecipePageState extends State<AddRecipePage> {
                     hintText: "Add Step",
                     suffixIcon: Icon(Icons.add, color: Colors.orangeAccent),
                   ),
+                ),
+                DropdownButtonFormField<String>(
+                  decoration: const InputDecoration(labelText: 'Category'),
+                  value: selectedCategory,
+                  items: const [
+                    DropdownMenuItem(value: 'Seasonal', child: Text('Seasonal')),
+                    DropdownMenuItem(value: 'Cakes', child: Text('Cakes')),
+                    DropdownMenuItem(value: 'Everyday', child: Text('Everyday')),
+                    DropdownMenuItem(value: 'Drinks', child: Text('Drinks')),
+                  ],
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      selectedCategory = newValue!;
+                    });
+                  },
                 ),
                 const SizedBox(height: 16),
                 // Submit Button
