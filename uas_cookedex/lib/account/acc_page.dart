@@ -446,7 +446,7 @@ class _AccountPageState extends State<AccountPage> {
         const SizedBox(height: 16),
         _buildRecipeCard(
           image: 'assets/images/recipe_user2.jpg',
-          title: "Resep Nasi Goreng Jawa",
+          title: "Resep Nasi Goreng JAWIRRRR",
           likes: 320,
           reviews: 190,
         ),
