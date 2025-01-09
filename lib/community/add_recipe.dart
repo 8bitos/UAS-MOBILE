@@ -19,7 +19,7 @@ class _AddRecipePageState extends State<AddRecipePage> {
   String? cookTimeHours;
   List<String> ingredients = [];
   List<String> steps = [];
-  String selectedCategory = 'Everyday'; 
+  String selectedCategory = 'Everyday';
   File? _selectedImage; // To store the selected image file
 
   final ImagePicker _picker = ImagePicker();
@@ -54,35 +54,35 @@ class _AddRecipePageState extends State<AddRecipePage> {
 
   // Submit the recipe
   void _submitRecipe() {
-  if (_formKey.currentState!.validate()) {
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    if (_formKey.currentState!.validate()) {
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
 
-    final newRecipe = {
-      "image": _selectedImage != null
-          ? _selectedImage!.path
-          : "assets/images/default_recipe.jpg",
-      "title": title!,
-      "description": description!,
-      "time": "${cookTimeHours ?? '0'}h ${cookTimeMinutes ?? '0'}m",
-      "ingredients": ingredients,
-      "steps": steps,
-      "difficulty": "Medium",
-      "author": userProvider.name,
-      "category": selectedCategory,
-    };
+      final newRecipe = {
+        "image": _selectedImage != null
+            ? _selectedImage!.path
+            : "assets/images/default_recipe.jpg",
+        "title": title!,
+        "description": description!,
+        "time": "${cookTimeHours ?? '0'}h ${cookTimeMinutes ?? '0'}m",
+        "ingredients": ingredients,
+        "steps": steps,
+        "difficulty": "Medium",
+        "author": userProvider.name,
+        "category": selectedCategory,
+      };
 
-    // Add the new recipe
-    userProvider.addRecipe(newRecipe);
-    
-    // Show confirmation
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Recipe added successfully')),
-    );
+      // Add the new recipe
+      userProvider.addRecipe(newRecipe);
 
-    // Navigate back
-    Navigator.of(context).pop();
+      // Show confirmation
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Recipe added successfully')),
+      );
+
+      // Navigate back
+      Navigator.of(context).pop();
+    }
   }
-}
 
   @override
   Widget build(BuildContext context) {
@@ -103,16 +103,18 @@ class _AddRecipePageState extends State<AddRecipePage> {
                 TextFormField(
                   decoration: const InputDecoration(labelText: "Title"),
                   onChanged: (value) => title = value,
-                  validator: (value) =>
-                      value == null || value.isEmpty ? "Title is required" : null,
+                  validator: (value) => value == null || value.isEmpty
+                      ? "Title is required"
+                      : null,
                 ),
                 const SizedBox(height: 16),
                 // Description Field
                 TextFormField(
                   decoration: const InputDecoration(labelText: "Description"),
                   onChanged: (value) => description = value,
-                  validator: (value) =>
-                      value == null || value.isEmpty ? "Description is required" : null,
+                  validator: (value) => value == null || value.isEmpty
+                      ? "Description is required"
+                      : null,
                 ),
                 const SizedBox(height: 16),
                 // Cook Time Fields
@@ -121,7 +123,8 @@ class _AddRecipePageState extends State<AddRecipePage> {
                     Expanded(
                       child: TextFormField(
                         keyboardType: TextInputType.number,
-                        decoration: const InputDecoration(labelText: "Cook Time (Minutes)"),
+                        decoration: const InputDecoration(
+                            labelText: "Cook Time (Minutes)"),
                         onChanged: (value) => cookTimeMinutes = value,
                       ),
                     ),
@@ -129,7 +132,8 @@ class _AddRecipePageState extends State<AddRecipePage> {
                     Expanded(
                       child: TextFormField(
                         keyboardType: TextInputType.number,
-                        decoration: const InputDecoration(labelText: "Cook Time (Hours)"),
+                        decoration: const InputDecoration(
+                            labelText: "Cook Time (Hours)"),
                         onChanged: (value) => cookTimeHours = value,
                       ),
                     ),
@@ -155,7 +159,8 @@ class _AddRecipePageState extends State<AddRecipePage> {
                 ),
                 const SizedBox(height: 16),
                 // Ingredients Section
-                const Text("Ingredients", style: TextStyle(fontWeight: FontWeight.bold)),
+                const Text("Ingredients",
+                    style: TextStyle(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
                 Column(
                   children: ingredients
@@ -183,7 +188,8 @@ class _AddRecipePageState extends State<AddRecipePage> {
                 ),
                 const SizedBox(height: 16),
                 // Steps Section
-                const Text("Steps", style: TextStyle(fontWeight: FontWeight.bold)),
+                const Text("Steps",
+                    style: TextStyle(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
                 Column(
                   children: steps
@@ -213,9 +219,11 @@ class _AddRecipePageState extends State<AddRecipePage> {
                   decoration: const InputDecoration(labelText: 'Category'),
                   value: selectedCategory,
                   items: const [
-                    DropdownMenuItem(value: 'Seasonal', child: Text('Seasonal')),
+                    DropdownMenuItem(
+                        value: 'Seasonal', child: Text('Seasonal')),
                     DropdownMenuItem(value: 'Cakes', child: Text('Cakes')),
-                    DropdownMenuItem(value: 'Everyday', child: Text('Everyday')),
+                    DropdownMenuItem(
+                        value: 'Everyday', child: Text('Everyday')),
                     DropdownMenuItem(value: 'Drinks', child: Text('Drinks')),
                   ],
                   onChanged: (String? newValue) {

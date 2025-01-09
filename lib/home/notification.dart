@@ -16,7 +16,7 @@ class NotificationPage extends StatelessWidget {
       body: Consumer<UserProvider>(
         builder: (context, userProvider, child) {
           final notifications = userProvider.notifications;
-          
+
           if (notifications.isEmpty) {
             return const Center(
               child: Text('No notifications yet'),
@@ -45,12 +45,12 @@ class NotificationPage extends StatelessWidget {
                   ),
                   title: Text(notification['title']),
                   subtitle: Text(notification['message']),
-                  trailing: notification['isRead'] 
-                    ? null 
-                    : const CircleAvatar(
-                        radius: 4,
-                        backgroundColor: Colors.orangeAccent,
-                      ),
+                  trailing: notification['isRead']
+                      ? null
+                      : const CircleAvatar(
+                          radius: 4,
+                          backgroundColor: Colors.orangeAccent,
+                        ),
                   onTap: () {
                     userProvider.markNotificationAsRead(index);
                   },

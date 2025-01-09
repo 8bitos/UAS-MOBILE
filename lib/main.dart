@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:uas_cookedex/home/tes.dart';
 import 'provider/user_provider.dart'; // Alias for main UserProvider
 import 'package:provider/provider.dart';
 import 'package:uas_cookedex/account/acc_credentials_edit.dart';
@@ -20,11 +21,12 @@ import 'community/add_recipe.dart';
 import 'screens/auth_screen.dart';
 import 'screens/forgot_pass_screen.dart';
 import 'provider/notification_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await NotificationService.initialize();
-  
+
   runApp(
     MultiProvider(
       providers: [
@@ -60,7 +62,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (context) => const SplashScreen(),
         '/authscreen': (context) => const AuthScreen(),
-        '/home': (context) => const HomePage(),
+        '/home': (context) => HomePage(),
         '/account': (context) => const AccountPage(),
         '/notification': (context) => const NotificationPage(),
         '/community-recipes': (context) => const CommunityPage(),
@@ -77,7 +79,8 @@ class MyApp extends StatelessWidget {
             ),
         '/add-recipe': (context) => const AddRecipePage(),
         '/cookbook-edit': (context) {
-          final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+          final args = ModalRoute.of(context)!.settings.arguments
+              as Map<String, dynamic>;
           return CookbookEditPage(
             photo: args['photo'],
             title: args['title'],
@@ -85,21 +88,23 @@ class MyApp extends StatelessWidget {
           );
         },
         '/reviews': (context) {
-            final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>;
-            return ReviewsPage(
-              recipeTitle: args['recipeTitle'] as String,
-              rating: args['rating'] as double,
-              reviews: List<Map<String, dynamic>>.from(args['reviews']),
-            );
-          },
+          final args = ModalRoute.of(context)?.settings.arguments
+              as Map<String, dynamic>;
+          return ReviewsPage(
+            recipeTitle: args['recipeTitle'] as String,
+            rating: args['rating'] as double,
+            reviews: List<Map<String, dynamic>>.from(args['reviews']),
+          );
+        },
         '/grocery-list': (context) {
-          final ingredients = ModalRoute.of(context)!.settings.arguments as List<Map<String, dynamic>>;
+          final ingredients = ModalRoute.of(context)!.settings.arguments
+              as List<Map<String, dynamic>>;
           return GroceryListPage(initialIngredients: ingredients);
         },
         '/edit-recipe': (context) {
-          final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?; // Use nullable type
+          final args = ModalRoute.of(context)?.settings.arguments
+              as Map<String, dynamic>?;
           if (args == null || !args.containsKey('recipe')) {
-            // Return a fallback screen or handle the error gracefully
             return Scaffold(
               appBar: AppBar(
                 title: const Text("Error"),
@@ -120,8 +125,6 @@ class MyApp extends StatelessWidget {
         switch (settings.name) {
           case '/recipe-detail':
             final args = settings.arguments as Map<String, dynamic>?;
-
-            // Ensure arguments are provided and valid
             if (args == null ||
                 !args.containsKey('title') ||
                 !args.containsKey('image') ||
@@ -141,8 +144,6 @@ class MyApp extends StatelessWidget {
                 ),
               );
             }
-
-            // Navigate to RecipeDetailPage with the parsed arguments
             return MaterialPageRoute(
               builder: (context) => RecipeDetailPage(
                 title: args['title'] as String,
@@ -152,39 +153,9 @@ class MyApp extends StatelessWidget {
                 difficulty: args['difficulty'] as String,
                 ingredients: List<String>.from(args['ingredients']),
                 steps: List<String>.from(args['steps']),
-                category: args['category'] as String? ?? 'Everyday', // Tambahkan kategori dengan default value
+                category: args['category'] as String? ?? 'Everyday',
               ),
             );
-          case '/cookbook-detail':
-            final args = settings.arguments as Map<String, dynamic>?;
-
-            // Ensure arguments are provided and valid
-            if (args == null ||
-                !args.containsKey('title') ||
-                !args.containsKey('description') ||
-                !args.containsKey('cookbookId')) {
-              return MaterialPageRoute(
-                builder: (context) => Scaffold(
-                  body: Center(
-                    child: Text(
-                      "Invalid cookbook data provided!",
-                      style: TextStyle(color: Colors.red, fontSize: 18),
-                    ),
-                  ),
-                ),
-              );
-            }
-
-            // Navigate to CookbookDetailPage
-            return MaterialPageRoute(
-              builder: (context) => CookbookDetailPage( // Use the alias here
-                title: args['title'] as String,
-                description: args['description'] as String,
-                photo: (args['photo'] ?? 'assets/images/cookbook.jpg') as String, // Provide fallback photo
-                cookbookId: args['cookbookId'] as String? ?? 'defaultCookbookId',
-              ),
-            );
-
           default:
             return MaterialPageRoute(
               builder: (context) => const Scaffold(
@@ -198,4 +169,3 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-

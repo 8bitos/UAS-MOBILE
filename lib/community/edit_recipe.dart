@@ -29,7 +29,8 @@ class _EditRecipePageState extends State<EditRecipePage> {
     super.initState();
     selectedCategory = widget.recipe['category'] ?? 'Everyday';
     titleController = TextEditingController(text: widget.recipe['title']);
-    descriptionController = TextEditingController(text: widget.recipe['description']);
+    descriptionController =
+        TextEditingController(text: widget.recipe['description']);
     ingredients = List<String>.from(widget.recipe['ingredients'] ?? []);
     steps = List<String>.from(widget.recipe['steps'] ?? []);
 
@@ -46,7 +47,8 @@ class _EditRecipePageState extends State<EditRecipePage> {
 
   Future<void> _pickImage() async {
     final ImagePicker picker = ImagePicker();
-    final XFile? pickedImage = await picker.pickImage(source: ImageSource.gallery);
+    final XFile? pickedImage =
+        await picker.pickImage(source: ImageSource.gallery);
     if (pickedImage != null) {
       setState(() {
         _recipeImage = File(pickedImage.path);
@@ -72,13 +74,17 @@ class _EditRecipePageState extends State<EditRecipePage> {
 
   void _saveRecipe() {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
-    
+
     final updatedRecipe = {
       'title': titleController.text,
       'description': descriptionController.text,
       'ingredients': ingredients,
       'steps': steps,
-      'difficulty': difficulty == 1 ? 'Easy' : difficulty == 2 ? 'Medium' : 'Hard',
+      'difficulty': difficulty == 1
+          ? 'Easy'
+          : difficulty == 2
+              ? 'Medium'
+              : 'Hard',
       'time': "${cookTimeHours}h ${cookTimeMinutes}m",
       'cookTimeMinutes': cookTimeMinutes,
       'cookTimeHours': cookTimeHours,
@@ -89,7 +95,7 @@ class _EditRecipePageState extends State<EditRecipePage> {
 
     // Update recipe di provider
     userProvider.updateRecipe(widget.recipe['title'], updatedRecipe);
-    
+
     // Kembalikan data yang diupdate
     Navigator.pop(context, updatedRecipe);
   }
@@ -139,7 +145,8 @@ class _EditRecipePageState extends State<EditRecipePage> {
                           fit: BoxFit.cover,
                         )
                       : Image.asset(
-                          widget.recipe['image'] ?? 'assets/images/default_recipe.jpg',
+                          widget.recipe['image'] ??
+                              'assets/images/default_recipe.jpg',
                           height: 200,
                           width: double.infinity,
                           fit: BoxFit.cover,
@@ -161,61 +168,66 @@ class _EditRecipePageState extends State<EditRecipePage> {
               decoration: const InputDecoration(labelText: 'Description'),
             ),
             const SizedBox(height: 16),
-            const Text('Category:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-              DropdownButtonFormField<String>(
-                value: selectedCategory,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                ),
-                items: const [
-                  DropdownMenuItem(value: 'Seasonal', child: Text('Seasonal')),
-                  DropdownMenuItem(value: 'Cakes', child: Text('Cakes')),
-                  DropdownMenuItem(value: 'Everyday', child: Text('Everyday')),
-                  DropdownMenuItem(value: 'Drinks', child: Text('Drinks')),
-                ],
-                onChanged: (String? newValue) {
-                  if (newValue != null) {
-                    setState(() {
-                      selectedCategory = newValue;
-                    });
-                  }
-                },
+            const Text('Category:',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            DropdownButtonFormField<String>(
+              value: selectedCategory,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                contentPadding:
+                    EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               ),
+              items: const [
+                DropdownMenuItem(value: 'Seasonal', child: Text('Seasonal')),
+                DropdownMenuItem(value: 'Cakes', child: Text('Cakes')),
+                DropdownMenuItem(value: 'Everyday', child: Text('Everyday')),
+                DropdownMenuItem(value: 'Drinks', child: Text('Drinks')),
+              ],
+              onChanged: (String? newValue) {
+                if (newValue != null) {
+                  setState(() {
+                    selectedCategory = newValue;
+                  });
+                }
+              },
+            ),
             const SizedBox(height: 16),
             // Cooking Time
-              const Text('Cooking Time:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                        labelText: 'Hours',
-                        suffixText: 'h',
-                      ),
-                      onChanged: (value) => setState(() => cookTimeHours = value),
-                      controller: TextEditingController(text: cookTimeHours),
+            const Text('Cooking Time:',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      labelText: 'Hours',
+                      suffixText: 'h',
                     ),
+                    onChanged: (value) => setState(() => cookTimeHours = value),
+                    controller: TextEditingController(text: cookTimeHours),
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: TextField(
-                      keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                        labelText: 'Minutes',
-                        suffixText: 'm',
-                      ),
-                      onChanged: (value) => setState(() => cookTimeMinutes = value),
-                      controller: TextEditingController(text: cookTimeMinutes),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: TextField(
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      labelText: 'Minutes',
+                      suffixText: 'm',
                     ),
+                    onChanged: (value) =>
+                        setState(() => cookTimeMinutes = value),
+                    controller: TextEditingController(text: cookTimeMinutes),
                   ),
-                ],
-              ),
-              const SizedBox(height: 16),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
             // Difficulty
-            const Text('Difficulty:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            const Text('Difficulty:',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             Row(
               children: List.generate(3, (index) {
                 return IconButton(
@@ -225,7 +237,8 @@ class _EditRecipePageState extends State<EditRecipePage> {
                   ),
                   onPressed: () {
                     setState(() {
-                      difficulty = index + 1; // Set difficulty based on star selected
+                      difficulty =
+                          index + 1; // Set difficulty based on star selected
                     });
                   },
                 );
@@ -233,7 +246,8 @@ class _EditRecipePageState extends State<EditRecipePage> {
             ),
             const SizedBox(height: 16),
             // Ingredients
-            const Text('Ingredients', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            const Text('Ingredients',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             Column(
               children: ingredients
                   .asMap()
@@ -243,7 +257,8 @@ class _EditRecipePageState extends State<EditRecipePage> {
                       title: Text(entry.value),
                       trailing: IconButton(
                         icon: const Icon(Icons.delete, color: Colors.red),
-                        onPressed: () => setState(() => ingredients.removeAt(entry.key)),
+                        onPressed: () =>
+                            setState(() => ingredients.removeAt(entry.key)),
                       ),
                     ),
                   )
@@ -255,7 +270,8 @@ class _EditRecipePageState extends State<EditRecipePage> {
             ),
             const SizedBox(height: 16),
             // Steps
-            const Text('Steps', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            const Text('Steps',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             Column(
               children: steps
                   .asMap()
@@ -265,7 +281,8 @@ class _EditRecipePageState extends State<EditRecipePage> {
                       title: Text(entry.value),
                       trailing: IconButton(
                         icon: const Icon(Icons.delete, color: Colors.red),
-                        onPressed: () => setState(() => steps.removeAt(entry.key)),
+                        onPressed: () =>
+                            setState(() => steps.removeAt(entry.key)),
                       ),
                     ),
                   )

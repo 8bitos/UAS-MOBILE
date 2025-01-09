@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-import 'auth_screen.dart'; 
+import 'package:uas_cookedex/screens/e-mail_login_screen.dart';
+import 'auth_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uas_cookedex/home/home.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -32,6 +35,25 @@ class _SplashScreenState extends State<SplashScreen> {
           "Cookédex stores your recipes in the cloud so you can access them anywhere, anytime.",
     },
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _checkIfLoggedIn();
+  }
+
+  // Function to check if the user is already logged in
+  Future<void> _checkIfLoggedIn() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('user_token');
+    if (token != null) {
+      // User is logged in, navigate to home screen
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => HomePage()),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -69,7 +91,8 @@ class _SplashScreenState extends State<SplashScreen> {
           Align(
             alignment: Alignment.bottomCenter,
             child: IgnorePointer(
-              ignoring: true, // Abaikan pointer agar PageView tetap menerima gesture
+              ignoring:
+                  true, // Abaikan pointer agar PageView tetap menerima gesture
               child: Container(
                 height: MediaQuery.of(context).size.height * 0.4,
                 width: double.infinity,
@@ -121,14 +144,15 @@ class _SplashScreenState extends State<SplashScreen> {
               onPressed: () {
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (context) => const AuthScreen()),
+                  MaterialPageRoute(
+                      builder: (context) => const EmailLoginScreen()),
                 );
               },
               child: const Text(
                 "Skip",
                 style: TextStyle(
                   fontWeight: FontWeight.bold, // Membuat bold
-                  color: Colors.orangeAccent,  // Warna tetap orange
+                  color: Colors.orangeAccent, // Warna tetap orange
                 ),
               ),
             ),
@@ -168,7 +192,8 @@ class _SplashScreenState extends State<SplashScreen> {
                 onPressed: () {
                   Navigator.pushReplacement(
                     context,
-                    MaterialPageRoute(builder: (context) => const AuthScreen()),
+                    MaterialPageRoute(
+                        builder: (context) => const EmailLoginScreen()),
                   );
                 },
                 style: ElevatedButton.styleFrom(
@@ -181,8 +206,8 @@ class _SplashScreenState extends State<SplashScreen> {
                   "Get Started",
                   style: TextStyle(
                     fontWeight: FontWeight.bold, // Membuat tulisan bold
-                    color: Colors.white,         // Warna tulisan putih
-                    fontSize: 16,                // Ukuran font
+                    color: Colors.white, // Warna tulisan putih
+                    fontSize: 16, // Ukuran font
                   ),
                 ),
               ),

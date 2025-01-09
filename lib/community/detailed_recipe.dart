@@ -95,12 +95,15 @@ class _RecipeDetailPageState extends State<RecipeDetailPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               image.startsWith('assets/')
-                  ? Image.asset(image, height: 200, width: double.infinity, fit: BoxFit.cover)
-                  : Image.file(File(image), height: 200, width: double.infinity, fit: BoxFit.cover),
+                  ? Image.asset(image,
+                      height: 200, width: double.infinity, fit: BoxFit.cover)
+                  : Image.file(File(image),
+                      height: 200, width: double.infinity, fit: BoxFit.cover),
               const SizedBox(height: 16),
               Text(
                 title,
-                style: GoogleFonts.poppins(fontSize: 24, fontWeight: FontWeight.bold),
+                style: GoogleFonts.poppins(
+                    fontSize: 24, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               Text(
@@ -117,7 +120,8 @@ class _RecipeDetailPageState extends State<RecipeDetailPage> {
               ),
               const SizedBox(height: 16),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
                   color: Colors.orangeAccent.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(20),
@@ -197,105 +201,111 @@ class _RecipeDetailPageState extends State<RecipeDetailPage> {
                 );
 
                 if (updatedRecipe != null) {
-                  final updatedRecipeMap = updatedRecipe as Map<String, dynamic>;
+                  final updatedRecipeMap =
+                      updatedRecipe as Map<String, dynamic>;
                   setState(() {
                     title = updatedRecipeMap['title'];
                     image = updatedRecipeMap['image'];
                     description = updatedRecipeMap['description'];
-                    time = "${updatedRecipeMap['cookTimeHours']}h ${updatedRecipeMap['cookTimeMinutes']}m";
+                    time =
+                        "${updatedRecipeMap['cookTimeHours']}h ${updatedRecipeMap['cookTimeMinutes']}m";
                     difficulty = updatedRecipeMap['difficulty'];
-                    ingredients = List<String>.from(updatedRecipeMap['ingredients']);
+                    ingredients =
+                        List<String>.from(updatedRecipeMap['ingredients']);
                     steps = List<String>.from(updatedRecipeMap['steps']);
                     category = updatedRecipeMap['category'];
                   });
                 }
               },
             ),
-           // Add this to the bottom navigation bar in RecipeDetailPage:
-IconButton(
-  icon: const Icon(Icons.rate_review, color: Colors.orangeAccent),
-  onPressed: () {
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
-    final userReviews = userProvider.userReviews
-        .where((review) => review['recipeTitle'] == title)
-        .toList();
-    
-    double averageRating = 0;
-    if (userReviews.isNotEmpty) {
-      averageRating = userReviews
-          .map((review) => review['rating'] as double)
-          .reduce((a, b) => a + b) / userReviews.length;
-    }
-    
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (context) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context); // Close bottom sheet
-                    // Navigate to reviews page
-                    Navigator.pushNamed(
-                      context,
-                      '/reviews',
-                      arguments: {
-                        'recipeTitle': title,
-                        'rating': averageRating,
-                        'reviews': userReviews,
-                      },
-                    );
-                  },
-                  child: Text(
-                    'See All Reviews (${userReviews.length})',
-                    style: const TextStyle(color: Colors.orange),
+            // Add this to the bottom navigation bar in RecipeDetailPage:
+            IconButton(
+              icon: const Icon(Icons.rate_review, color: Colors.orangeAccent),
+              onPressed: () {
+                final userProvider =
+                    Provider.of<UserProvider>(context, listen: false);
+                final userReviews = userProvider.userReviews
+                    .where((review) => review['recipeTitle'] == title)
+                    .toList();
+
+                double averageRating = 0;
+                if (userReviews.isNotEmpty) {
+                  averageRating = userReviews
+                          .map((review) => review['rating'] as double)
+                          .reduce((a, b) => a + b) /
+                      userReviews.length;
+                }
+
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  builder: (context) => Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            TextButton(
+                              onPressed: () {
+                                Navigator.pop(context); // Close bottom sheet
+                                // Navigate to reviews page
+                                Navigator.pushNamed(
+                                  context,
+                                  '/reviews',
+                                  arguments: {
+                                    'recipeTitle': title,
+                                    'rating': averageRating,
+                                    'reviews': userReviews,
+                                  },
+                                );
+                              },
+                              child: Text(
+                                'See All Reviews (${userReviews.length})',
+                                style: const TextStyle(color: Colors.orange),
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.close),
+                              onPressed: () => Navigator.pop(context),
+                            ),
+                          ],
+                        ),
+                        const Divider(),
+                        Padding(
+                          padding: EdgeInsets.only(
+                            bottom: MediaQuery.of(context).viewInsets.bottom,
+                            top: 8,
+                          ),
+                          child: TextField(
+                            decoration: const InputDecoration(
+                              hintText: 'Add a review...',
+                              border: OutlineInputBorder(),
+                            ),
+                            maxLines: 3,
+                            onTap: () {
+                              Navigator.pop(context); // Close bottom sheet
+                              // Navigate to reviews page
+                              Navigator.pushNamed(
+                                context,
+                                '/reviews',
+                                arguments: {
+                                  'recipeTitle': title,
+                                  'rating': averageRating,
+                                  'reviews': userReviews,
+                                },
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.close),
-                  onPressed: () => Navigator.pop(context),
-                ),
-              ],
+                );
+              },
             ),
-            const Divider(),
-            Padding(
-              padding: EdgeInsets.only(
-                bottom: MediaQuery.of(context).viewInsets.bottom,
-                top: 8,
-              ),
-              child: TextField(
-                decoration: const InputDecoration(
-                  hintText: 'Add a review...',
-                  border: OutlineInputBorder(),
-                ),
-                maxLines: 3,
-                onTap: () {
-                  Navigator.pop(context); // Close bottom sheet
-                  // Navigate to reviews page
-                  Navigator.pushNamed(
-                    context,
-                    '/reviews',
-                    arguments: {
-                      'recipeTitle': title,
-                      'rating': averageRating,
-                      'reviews': userReviews,
-                    },
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  },
-),
             IconButton(
               icon: const Icon(Icons.shopping_cart, color: Colors.orangeAccent),
               onPressed: () {

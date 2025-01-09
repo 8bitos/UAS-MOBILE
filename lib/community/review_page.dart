@@ -80,7 +80,7 @@ class _ReviewsPageState extends State<ReviewsPage> {
             ),
           ),
           const Divider(height: 1),
-          
+
           // Add Review Section
           Container(
             padding: const EdgeInsets.all(16.0),
@@ -119,10 +119,11 @@ class _ReviewsPageState extends State<ReviewsPage> {
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: () {
-                      if (_userRating > 0 && _reviewController.text.isNotEmpty) {
+                      if (_userRating > 0 &&
+                          _reviewController.text.isNotEmpty) {
                         final userProvider =
                             Provider.of<UserProvider>(context, listen: false);
-                        
+
                         // Buat review baru
                         final newReview = {
                           'recipeTitle': widget.recipeTitle,
@@ -132,23 +133,24 @@ class _ReviewsPageState extends State<ReviewsPage> {
                           'authorImage': userProvider.profileImage,
                           'timestamp': DateTime.now().toString(),
                         };
-                        
+
                         // Tambah ke provider
                         userProvider.addReview(newReview);
-                        
+
                         // Tambah ke list lokal
                         setState(() {
                           widget.reviews.insert(0, newReview);
                         });
-                        
+
                         // Reset form
                         _reviewController.clear();
                         setState(() {
                           _userRating = 0;
                         });
-                        
+
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Review added successfully!')),
+                          const SnackBar(
+                              content: Text('Review added successfully!')),
                         );
                       }
                     },
@@ -162,7 +164,7 @@ class _ReviewsPageState extends State<ReviewsPage> {
             ),
           ),
           const Divider(height: 1),
-          
+
           // Reviews List
           Expanded(
             child: ListView.separated(
@@ -179,8 +181,8 @@ class _ReviewsPageState extends State<ReviewsPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           CircleAvatar(
-                            backgroundImage: AssetImage(
-                                review['authorImage'] ?? 'assets/images/profile.png'),
+                            backgroundImage: AssetImage(review['authorImage'] ??
+                                'assets/images/profile.png'),
                           ),
                           const SizedBox(width: 12),
                           Expanded(
@@ -212,13 +214,14 @@ class _ReviewsPageState extends State<ReviewsPage> {
                                           Provider.of<UserProvider>(context,
                                                   listen: false)
                                               .deleteReview(review);
-                                          
+
                                           // Hapus dari list lokal
                                           setState(() {
                                             widget.reviews.removeWhere((r) =>
                                                 r['timestamp'] ==
                                                     review['timestamp'] &&
-                                                r['author'] == review['author']);
+                                                r['author'] ==
+                                                    review['author']);
                                           });
                                         },
                                       ),

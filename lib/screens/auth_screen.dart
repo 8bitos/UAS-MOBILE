@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:dio/dio.dart';
 import 'package:uas_cookedex/home/home.dart';
 import 'splash_screen.dart';
 import 'e-mail_login_screen.dart';
@@ -18,6 +19,47 @@ class _AuthScreenState extends State<AuthScreen> {
   final TextEditingController _passwordController = TextEditingController();
 
   bool _isPasswordVisible = false; // For toggling password visibility
+
+  // Function to register user
+  Future<void> registerUser() async {
+    final dio = Dio();
+
+    try {
+      final response = await dio.post(
+        'http://127.0.0.1:8000/api/register', // Replace with your API URL
+        data: {
+          'email': _emailController.text.trim(),
+          'name': _usernameController.text.trim(),
+          'password': _passwordController.text.trim(),
+        },
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        // Registration successful
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Registration successful!')),
+        );
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const EmailLoginScreen()),
+        );
+      }
+    } catch (e) {
+      // Handle error
+      if (e is DioError) {
+        final errorMessage =
+            e.response?.data['message'] ?? 'Something went wrong!';
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(errorMessage)),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('An unexpected error occurred.')),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +81,8 @@ class _AuthScreenState extends State<AuthScreen> {
               onPressed: () {
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (context) => const SplashScreen()),
+                  MaterialPageRoute(
+                      builder: (context) => const EmailLoginScreen()),
                 );
               },
               style: ElevatedButton.styleFrom(
@@ -53,7 +96,7 @@ class _AuthScreenState extends State<AuthScreen> {
           // White overlay box
           Align(
             alignment: Alignment.bottomCenter,
-            child: SingleChildScrollView( // Add this to make the content scrollable
+            child: SingleChildScrollView(
               child: Container(
                 decoration: const BoxDecoration(
                   color: Colors.white,
@@ -62,9 +105,10 @@ class _AuthScreenState extends State<AuthScreen> {
                     topRight: Radius.circular(24),
                   ),
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
                 child: Form(
-                  key: _formKey, // Wrap fields in a Form widget
+                  key: _formKey,
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -85,7 +129,7 @@ class _AuthScreenState extends State<AuthScreen> {
                         ),
                       ),
                       const SizedBox(height: 32),
-                      // Email, Username, Password Fields
+                      // Email Field
                       TextFormField(
                         controller: _emailController,
                         keyboardType: TextInputType.emailAddress,
@@ -106,6 +150,7 @@ class _AuthScreenState extends State<AuthScreen> {
                         },
                       ),
                       const SizedBox(height: 16),
+                      // Username Field
                       TextFormField(
                         controller: _usernameController,
                         keyboardType: TextInputType.text,
@@ -123,9 +168,10 @@ class _AuthScreenState extends State<AuthScreen> {
                         },
                       ),
                       const SizedBox(height: 16),
+                      // Password Field
                       TextFormField(
                         controller: _passwordController,
-                        obscureText: !_isPasswordVisible, // Toggle visibility
+                        obscureText: !_isPasswordVisible,
                         decoration: InputDecoration(
                           hintText: 'Password',
                           suffixIcon: IconButton(
@@ -161,12 +207,7 @@ class _AuthScreenState extends State<AuthScreen> {
                         child: ElevatedButton(
                           onPressed: () {
                             if (_formKey.currentState!.validate()) {
-                              // Navigate to Home Screen
-                              Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => const HomePage()),
-                              );
+                              registerUser();
                             }
                           },
                           style: ElevatedButton.styleFrom(

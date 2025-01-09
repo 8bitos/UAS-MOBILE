@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:uas_cookedex/screens/auth_screen.dart';
-import 'forgot_pass_screen.dart'; // Import ForgotPasswordScreen
+import 'package:uas_cookedex/home/home.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uas_cookedex/services/auth_service.dart';
+import 'forgot_pass_screen.dart';
 
 class EmailLoginScreen extends StatefulWidget {
   const EmailLoginScreen({super.key});
@@ -13,15 +16,15 @@ class EmailLoginScreen extends StatefulWidget {
 class _EmailLoginScreenState extends State<EmailLoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  bool _isForgotPasswordHovered = false;
-  bool _isRegisterHereHovered = false;
+  bool _isLoading = false;
 
-  void _login() {
+  final AuthService _authService = AuthService();
+
+  Future<void> _login() async {
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
 
     if (email.isEmpty || password.isEmpty) {
-      // Show error message if fields are empty
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Please fill in all fields'),
@@ -31,8 +34,52 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
       return;
     }
 
-    // Navigate to the home screen (replace '/home' with your home route)
-    Navigator.pushReplacementNamed(context, '/home');
+    setState(() {
+      _isLoading = true;
+    });
+
+    final loginResult = await _authService.login(email, password);
+
+    if (loginResult['success']) {
+      final token = loginResult['token'];
+
+      // Save token to SharedPreferences
+      await _authService.saveUserToken(token);
+
+      final userResponse = await _authService.fetchUserDetails(token);
+
+      if (userResponse['success']) {
+        final name = userResponse['name'];
+        final email = userResponse['email'];
+
+        // Save user details to SharedPreferences
+        await _authService.saveUserDetails(name, email);
+
+        // Navigate to home screen
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => HomePage()),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Failed to fetch user details'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(loginResult['message']),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+
+    setState(() {
+      _isLoading = false;
+    });
   }
 
   @override
@@ -40,14 +87,12 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          // Background Image
           Positioned.fill(
             child: Image.asset(
-              'assets/images/auth1.jpg', // Ensure the path to the image is correct
+              'assets/images/auth1.jpg',
               fit: BoxFit.cover,
             ),
           ),
-          // Login Form
           Align(
             alignment: Alignment.bottomCenter,
             child: Container(
@@ -62,7 +107,6 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // App Title
                   Text(
                     'Cookédex',
                     style: GoogleFonts.poppins(
@@ -79,7 +123,6 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
                     ),
                   ),
                   const SizedBox(height: 32),
-                  // E-mail Field
                   TextField(
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
@@ -91,13 +134,11 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  // Password Field
                   PasswordField(
                     labelText: 'Password',
                     controller: _passwordController,
                   ),
                   const SizedBox(height: 16),
-                  // Forgot Password Link
                   Align(
                     alignment: Alignment.centerRight,
                     child: GestureDetector(
@@ -109,52 +150,37 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
                                   const ForgotPasswordScreen()),
                         );
                       },
-                      onTapDown: (_) {
-                        setState(() {
-                          _isForgotPasswordHovered = true;
-                        });
-                      },
-                      onTapCancel: () {
-                        setState(() {
-                          _isForgotPasswordHovered = false;
-                        });
-                      },
                       child: Text(
                         'forgot password',
-                        style: TextStyle(
-                          color: _isForgotPasswordHovered
-                              ? Colors.orangeAccent
-                              : Colors.grey,
-                          fontWeight: _isForgotPasswordHovered
-                              ? FontWeight.bold
-                              : FontWeight.normal,
-                        ),
+                        style: TextStyle(color: Colors.grey),
                       ),
                     ),
                   ),
                   const SizedBox(height: 16),
-                  // Log In Button
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: _login,
+                      onPressed: _isLoading ? null : _login,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.orangeAccent,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: const Text(
-                        'Log In',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
+                      child: _isLoading
+                          ? const CircularProgressIndicator(
+                              color: Colors.white,
+                            )
+                          : const Text(
+                              'Log In',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
                     ),
                   ),
                   const SizedBox(height: 16),
-                  // Register Redirect
                   GestureDetector(
                     onTap: () {
                       Navigator.pushReplacement(
@@ -164,26 +190,9 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
                         ),
                       );
                     },
-                    onTapDown: (_) {
-                      setState(() {
-                        _isRegisterHereHovered = true;
-                      });
-                    },
-                    onTapCancel: () {
-                      setState(() {
-                        _isRegisterHereHovered = false;
-                      });
-                    },
                     child: Text(
                       "Haven't made an account? Register here.",
-                      style: TextStyle(
-                        color: _isRegisterHereHovered
-                            ? Colors.orangeAccent
-                            : Colors.grey,
-                        fontWeight: _isRegisterHereHovered
-                            ? FontWeight.bold
-                            : FontWeight.normal,
-                      ),
+                      style: TextStyle(color: Colors.grey),
                     ),
                   ),
                 ],
@@ -197,7 +206,8 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
 }
 
 class PasswordField extends StatefulWidget {
-  const PasswordField({super.key, required this.labelText, required this.controller});
+  const PasswordField(
+      {super.key, required this.labelText, required this.controller});
 
   final String labelText;
   final TextEditingController controller;
