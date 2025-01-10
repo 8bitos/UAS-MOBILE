@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:uas_cookedex/home/chatbotspage.dart';
 import 'package:uas_cookedex/home/create_recipe.dart';
 import 'package:uas_cookedex/services/recipe_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -19,15 +20,14 @@ class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
   bool _isSearching = false;
   TextEditingController _searchController = TextEditingController();
-  String? _userName; // Add user name field
+  String? _userName;
 
-  @override
   @override
   void initState() {
     super.initState();
-    _loadUserData(); // Load user data
-    _loadRecipes(); // Load recipes once when the page is initialized
-    _loadSortPreference(); // Load sort preference if it exists
+    _loadUserData();
+    _loadRecipes();
+    _loadSortPreference();
   }
 
   Future<void> _loadSortPreference() async {
@@ -38,11 +38,10 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  // Function to load user data from shared preferences
   Future<void> _loadUserData() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      _userName = prefs.getString('user_name') ?? 'User'; // Get username
+      _userName = prefs.getString('user_name') ?? 'User';
     });
   }
 
@@ -60,7 +59,6 @@ class _HomePageState extends State<HomePage> {
         _filteredRecipes = recipes;
       });
 
-      // Apply sorting if a sort option is selected
       if (_currentSortOption.isNotEmpty) {
         _onSortSelected(_currentSortOption);
       }
@@ -76,19 +74,15 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _refreshRecipes() async {
     setState(() {
-      _recipes.clear(); // Clear the existing recipes
+      _recipes.clear();
     });
-
-    // Reload the recipes
     _loadRecipes();
-
-    // Reapply the current sort order
     if (_filteredRecipes.isNotEmpty) {
       _onSortSelected(_currentSortOption);
     }
   }
 
-  String _currentSortOption = 'Latest-Newest'; // Default sorting option
+  String _currentSortOption = 'Latest-Newest';
 
   void _onSearchChanged(String query) {
     setState(() {
@@ -111,10 +105,8 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _onSortSelected(String option) async {
     setState(() {
-      _currentSortOption = option; // Store the selected sort option
+      _currentSortOption = option;
     });
-
-    // Save the selected option in SharedPreferences to persist the choice
     final prefs = await SharedPreferences.getInstance();
     prefs.setString('sort_option', option);
 
@@ -197,7 +189,7 @@ class _HomePageState extends State<HomePage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        _userName ?? "Hi User", // Display username
+                        _userName ?? "Hi User",
                         style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -253,146 +245,159 @@ class _HomePageState extends State<HomePage> {
           ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(
               onRefresh: _refreshRecipes,
-              child: SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (_isSearching)
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 16.0),
-                          child: TextField(
-                            controller: _searchController,
-                            onChanged: _onSearchChanged,
-                            decoration: const InputDecoration(
-                              labelText: 'Search recipes...',
-                              border: OutlineInputBorder(),
-                              prefixIcon: Icon(Icons.search),
-                            ),
-                          ),
-                        ),
-                      const Text(
-                        "Featured Community Recipes",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      const Text(
-                        "Get lots of recipe inspiration from the community",
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey,
-                        ),
-                      ),
-                      ..._filteredRecipes.map((recipe) {
-                        final bool isLiked = recipe['is_liked'] ?? false;
-                        final String createdAt = recipe['created_at'] != null
-                            ? DateFormat('d MMMM yyyy').format(
-                                DateTime.parse(recipe['created_at']).toLocal())
-                            : 'Unknown date';
-
-                        return GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => RecipeDetailPage(
-                                  recipe: recipe,
+              child: IndexedStack(
+                index: _selectedIndex,
+                children: [
+                  // Home Page
+                  SingleChildScrollView(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (_isSearching)
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 16.0),
+                              child: TextField(
+                                controller: _searchController,
+                                onChanged: _onSearchChanged,
+                                decoration: const InputDecoration(
+                                  labelText: 'Search recipes...',
+                                  border: OutlineInputBorder(),
+                                  prefixIcon: Icon(Icons.search),
                                 ),
                               ),
-                            );
-                          },
-                          child: Card(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
                             ),
-                            margin: const EdgeInsets.symmetric(vertical: 10),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                recipe['image_url'] != null
-                                    ? Image.network(
-                                        recipe['image_url'],
-                                        fit: BoxFit.cover,
-                                        width: double.infinity,
-                                        height: 200,
-                                      )
-                                    : const SizedBox.shrink(),
-                                Padding(
-                                  padding: const EdgeInsets.all(16.0),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        recipe['title'],
-                                        style: const TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 8),
-                                      Row(
+                          const Text(
+                            "Featured Community Recipes",
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          const Text(
+                            "Get lots of recipe inspiration from the community",
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey,
+                            ),
+                          ),
+                          ..._filteredRecipes.map((recipe) {
+                            final bool isLiked = recipe['is_liked'] ?? false;
+                            final String createdAt =
+                                recipe['created_at'] != null
+                                    ? DateFormat('d MMMM yyyy').format(
+                                        DateTime.parse(recipe['created_at'])
+                                            .toLocal())
+                                    : 'Unknown date';
+
+                            return GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => RecipeDetailPage(
+                                      recipe: recipe,
+                                    ),
+                                  ),
+                                );
+                              },
+                              child: Card(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                margin:
+                                    const EdgeInsets.symmetric(vertical: 10),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    recipe['image_url'] != null
+                                        ? Image.network(
+                                            recipe['image_url'],
+                                            fit: BoxFit.cover,
+                                            width: double.infinity,
+                                            height: 200,
+                                          )
+                                        : const SizedBox.shrink(),
+                                    Padding(
+                                      padding: const EdgeInsets.all(16.0),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Text(
-                                            'by ${recipe['user']['name']}',
+                                            recipe['title'],
                                             style: const TextStyle(
-                                              fontSize: 14,
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 8),
+                                          Row(
+                                            children: [
+                                              Text(
+                                                'by ${recipe['user']['name']}',
+                                                style: const TextStyle(
+                                                  fontSize: 14,
+                                                  color: Colors.grey,
+                                                ),
+                                              ),
+                                              const Spacer(),
+                                              Text(
+                                                  '${recipe['likes_count']} Likes'),
+                                            ],
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            'Created on: $createdAt',
+                                            style: const TextStyle(
+                                              fontSize: 12,
                                               color: Colors.grey,
                                             ),
                                           ),
-                                          const Spacer(),
-                                          Text(
-                                              '${recipe['likes_count']} Likes'),
                                         ],
                                       ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        'Created on: $createdAt',
-                                        style: const TextStyle(
-                                          fontSize: 12,
-                                          color: Colors.grey,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                      _isLoading
-                          ? const Padding(
-                              padding: EdgeInsets.symmetric(vertical: 16),
-                              child: Center(child: CircularProgressIndicator()),
-                            )
-                          : const SizedBox.shrink(),
-                    ],
+                              ),
+                            );
+                          }).toList(),
+                          _isLoading
+                              ? const Padding(
+                                  padding: EdgeInsets.symmetric(vertical: 16),
+                                  child: Center(
+                                      child: CircularProgressIndicator()),
+                                )
+                              : const SizedBox.shrink(),
+                        ],
+                      ),
+                    ),
                   ),
-                ),
+                  // Chatbot Page
+                  ChatbotsPage(),
+                ],
               ),
             ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => CreateRecipePage()),
-          ).then((reload) {
-            // Reload only if the callback returns true
-            if (reload == true) {
-              setState(() {
-                _loadRecipes(); // Reload recipes when returning
-              });
-            }
-          });
-        },
-        backgroundColor: Colors.orangeAccent,
-        child: const Icon(Icons.add),
-      ),
+      floatingActionButton: _selectedIndex == 0 // Hide button on chatbot page
+          ? FloatingActionButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => CreateRecipePage()),
+                ).then((reload) {
+                  if (reload == true) {
+                    setState(() {
+                      _loadRecipes();
+                    });
+                  }
+                });
+              },
+              backgroundColor: Colors.orangeAccent,
+              child: const Icon(Icons.add),
+            )
+          : null,
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,

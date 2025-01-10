@@ -42,6 +42,8 @@ dependencies:
   dio: ^5.7.0
   shared_preferences: ^2.3.5
   avatar_glow: ^3.0.1
+  dio_http2_adapter: ^2.5.3
+  google_generative_ai: ^0.4.6
 
 dev_dependencies:
   flutter_test:
@@ -86,7 +88,8 @@ flutter:
     - assets/images/recipe_user2.jpg
     - assets/images/default_recipe.jpg
     - assets/images/cookbook.jpg
-    
+    - assets/images/united-kingdom.png
+    - assets/images/indonesia-flag.png
  
 
   # To add assets to your application, add an assets section, like this:
