@@ -13,7 +13,7 @@ class RecipeService {
     }
 
     final response = await _dio.get(
-      'http://localhost:8000/api/recipes',
+      'http://127.0.0.1:8000/api/recipes',
       options: Options(
         headers: {'Authorization': 'Bearer $token'},
       ),

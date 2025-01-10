@@ -5,6 +5,8 @@ import 'package:uas_cookedex/home/home.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uas_cookedex/services/auth_service.dart';
 import 'forgot_pass_screen.dart';
+import 'package:flutter/gestures.dart';
+
 
 class EmailLoginScreen extends StatefulWidget {
   const EmailLoginScreen({super.key});
@@ -116,7 +118,7 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Log-in with E-Mail',
+                    'Login with E-Mail',
                     style: GoogleFonts.poppins(
                       fontSize: 14,
                       color: Colors.grey,
@@ -172,7 +174,7 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
                               color: Colors.white,
                             )
                           : const Text(
-                              'Log In',
+                              'Login',
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white,
@@ -181,20 +183,30 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const AuthScreen(),
+                  RichText(
+                    text: TextSpan(
+                      text: "Haven't made an account? ",
+                      style: const TextStyle(color: Colors.grey), // Non-clickable part
+                      children: [
+                        TextSpan(
+                          text: "Register here",
+                          style: const TextStyle(
+                            color: Colors.orangeAccent, // Color for the clickable text
+                            fontWeight: FontWeight.bold, // Optional styling for emphasis
+                          ),
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const AuthScreen(),
+                                ),
+                              );
+                            },
                         ),
-                      );
-                    },
-                    child: Text(
-                      "Haven't made an account? Register here.",
-                      style: TextStyle(color: Colors.grey),
+                      ],
                     ),
-                  ),
+                  ),          
                 ],
               ),
             ),

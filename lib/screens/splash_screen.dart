@@ -148,11 +148,18 @@ class _SplashScreenState extends State<SplashScreen> {
                       builder: (context) => const EmailLoginScreen()),
                 );
               },
-              child: const Text(
-                "Skip",
-                style: TextStyle(
-                  fontWeight: FontWeight.bold, // Membuat bold
-                  color: Colors.orangeAccent, // Warna tetap orange
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8), // Adds padding around the text
+                decoration: BoxDecoration(
+                  color: Colors.orangeAccent, // Background color of the bold styling
+                  borderRadius: BorderRadius.circular(8), // Makes the edges rounded for a softer look
+                ),
+                child: const Text(
+                  "Skip",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold, // Bold text
+                    color: Colors.white, // Text color remains orangeAccent
+                  ),
                 ),
               ),
             ),
@@ -185,29 +192,31 @@ class _SplashScreenState extends State<SplashScreen> {
 
           // Get Started Button (Last Page Only)
           if (_currentPage == splashData.length - 1)
-            Positioned(
-              bottom: 40,
-              right: 20,
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const EmailLoginScreen()),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orangeAccent, // Warna tombol
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+            Align(
+              alignment: Alignment.bottomCenter, // Center horizontally and align to the bottom
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 40), // Add space from the bottom
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const EmailLoginScreen()),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.orangeAccent, // Button color
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
-                ),
-                child: const Text(
-                  "Get Started",
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold, // Membuat tulisan bold
-                    color: Colors.white, // Warna tulisan putih
-                    fontSize: 16, // Ukuran font
+                  child: const Text(
+                    "Get Started",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold, // Bold text
+                      color: Colors.white, // White text
+                      fontSize: 16, // Font size
+                    ),
                   ),
                 ),
               ),

@@ -12,6 +12,7 @@ class _HomePageState extends State<HomePage> {
   final _recipeService = RecipeService();
   List<dynamic> _recipes = [];
   bool _isLoading = false;
+  int _selectedIndex = 0;
 
   @override
   void initState() {
@@ -72,173 +73,186 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  void _onFabClick(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: Icon(Icons.book),
+              title: Text('Add Cookbook'),
+              onTap: () {
+                Navigator.pop(context);
+                // Navigate to add cookbook
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.receipt),
+              title: Text('Add Recipe'),
+              onTap: () {
+                Navigator.pop(context);
+                // Navigate to add recipe
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Home'),
+        title: const Text('Home'),
       ),
       body: _isLoading
-          ? Center(child: CircularProgressIndicator())
-          : ListView.builder(
-              itemCount: _recipes.length,
-              itemBuilder: (ctx, index) {
-                final recipe = _recipes[index];
-                final bool isLiked = recipe['is_liked'] ?? false;
-                final bool isSaved = recipe['is_saved'] ?? false;
-
-                // Truncate description to 100 characters
-                String truncatedDescription = recipe['description'];
-                if (truncatedDescription.length > 100) {
-                  truncatedDescription =
-                      truncatedDescription.substring(0, 100) + '...';
-                }
-
-                return GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => RecipeDetailPage(
-                            recipe: recipe), // Navigate to detail page
+          ? const Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "Featured Community Recipes",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
                       ),
-                    );
-                  },
-                  child: Card(
-                    margin: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
-                    child: Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          recipe['image_url'] != null
-                              ? Image.network(
-                                  recipe['image_url'],
-                                  height: 200,
-                                  width: double.infinity,
-                                  fit: BoxFit.cover,
-                                )
-                              : SizedBox.shrink(),
-                          SizedBox(height: 10),
-                          Text(
-                            recipe['title'],
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      "Get lots of recipe inspiration from the community",
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey,
+                      ),
+                    ),
+                    ..._recipes.map((recipe) {
+                      final bool isLiked = recipe['is_liked'] ?? false;
+                      final bool isSaved = recipe['is_saved'] ?? false;
+
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => RecipeDetailPage(
+                                recipe: recipe,
+                              ),
                             ),
+                          );
+                        },
+                        child: Card(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
                           ),
-                          SizedBox(height: 5),
-                          Text(
-                            'By: ${recipe['user']['name']}',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey[700],
-                            ),
-                          ),
-                          SizedBox(height: 10),
-                          Text(
-                              truncatedDescription), // Display truncated description
-                          SizedBox(height: 10),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          margin: const EdgeInsets.symmetric(vertical: 10),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Row(
-                                children: [
-                                  GestureDetector(
-                                    onTap: () {
-                                      _toggleLike(recipe['id'], isLiked, index);
-                                    },
-                                    child: Icon(
-                                      Icons.favorite,
-                                      color: isLiked ? Colors.red : Colors.grey,
+                              recipe['image_url'] != null
+                                  ? Image.network(
+                                      recipe['image_url'],
+                                      fit: BoxFit.cover,
+                                      width: double.infinity,
+                                      height: 200,
+                                    )
+                                  : const SizedBox.shrink(),
+                              Padding(
+                                padding: const EdgeInsets.all(16.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      recipe['title'],
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
-                                  ),
-                                  SizedBox(width: 5),
-                                  Text('${recipe['likes_count']} Likes'),
-                                ],
-                              ),
-                              Row(
-                                children: [
-                                  GestureDetector(
-                                    onTap: () {
-                                      _showCommentDialog(recipe['id']);
-                                    },
-                                    child:
-                                        Icon(Icons.comment, color: Colors.blue),
-                                  ),
-                                  SizedBox(width: 5),
-                                  Text('${recipe['comments_count']} Comments'),
-                                ],
-                              ),
-                              Row(
-                                children: [
-                                  GestureDetector(
-                                    onTap: () {
-                                      _toggleSave(recipe['id'], isSaved, index);
-                                    },
-                                    child: Icon(
-                                      Icons.bookmark,
-                                      color:
-                                          isSaved ? Colors.green : Colors.grey,
+                                    const SizedBox(height: 8),
+                                    Row(
+                                      children: [
+                                        Text(
+                                          'by ${recipe['user']['name']}',
+                                          style: const TextStyle(
+                                            fontSize: 14,
+                                            color: Colors.grey,
+                                          ),
+                                        ),
+                                        const Spacer(),
+                                        Text('${recipe['likes_count']} Likes'),
+                                      ],
                                     ),
-                                  ),
-                                  SizedBox(width: 5),
-                                  Text('${recipe['saved_by_count']} Saves'),
-                                ],
+                                  ],
+                                ),
                               ),
                             ],
                           ),
-                        ],
+                        ),
+                      );
+                    }),
+                    const SizedBox(height: 8),
+                    GestureDetector(
+                      onTap: () {},
+                      child: const Text(
+                        "See All Recipes by Community",
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.orangeAccent,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
-                  ),
-                );
-              },
+                  ],
+                ),
+              ),
             ),
-    );
-  }
-
-  void _showCommentDialog(int recipeId) {
-    final TextEditingController _commentController = TextEditingController();
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text('Add Comment'),
-          content: TextField(
-            controller: _commentController,
-            decoration: InputDecoration(hintText: 'Write your comment here'),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _onFabClick(context),
+        backgroundColor: Colors.orangeAccent,
+        child: const Icon(Icons.add),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
+        backgroundColor: Colors.white,
+        selectedItemColor: Colors.orangeAccent,
+        unselectedItemColor: Colors.grey,
+        showSelectedLabels: false,
+        showUnselectedLabels: false,
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home, size: 28),
+            label: "",
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () async {
-                final comment = _commentController.text;
-                if (comment.isNotEmpty) {
-                  await _addComment(recipeId, comment);
-                  Navigator.of(context).pop();
-                }
-              },
-              child: Text('Submit'),
-            ),
-          ],
-        );
-      },
+          BottomNavigationBarItem(
+            icon: Icon(Icons.search, size: 28),
+            label: "",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.chat, size: 28),
+            label: "",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.calendar_month, size: 28),
+            label: "",
+          ),
+        ],
+      ),
     );
-  }
-
-  Future<void> _addComment(int recipeId, String content) async {
-    try {
-      await _recipeService.addComment(recipeId, content);
-      _loadRecipes();
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Failed to add comment: $e'),
-      ));
-    }
   }
 }
