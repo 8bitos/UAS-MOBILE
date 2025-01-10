@@ -35,5 +35,14 @@ class LikeController extends Controller
         $like->delete();
         return response()->json(['message' => 'Like removed successfully']);
     }
-    
+    public function userLikedRecipes()
+{
+    $userId = auth()->id();
+    $likedRecipes = Recipe::whereHas('likes', function ($query) use ($userId) {
+        $query->where('user_id', $userId);
+    })->withCount(['likes', 'comments', 'savedByUsers as saved_by_count'])->get();
+
+    return response()->json($likedRecipes);
+}
+
 }

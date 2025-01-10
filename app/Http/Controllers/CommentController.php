@@ -7,9 +7,12 @@ use Illuminate\Http\Request;
 
 class CommentController extends Controller
 {
-    public function index(Recipe $recipe)
+    public function index($recipeId)
     {
-        return $recipe->comments()->with('user')->get();
+        $recipe = Recipe::findOrFail($recipeId);
+        $comments = $recipe->comments()->with('user')->get();
+
+        return response()->json($comments);
     }
 
     public function store(Request $request, Recipe $recipe)
@@ -35,4 +38,14 @@ class CommentController extends Controller
         $comment->delete();
         return response()->json(['message' => 'Comment deleted successfully']);
     }
+    public function userCommentedRecipes()
+{
+    $userId = auth()->id();
+    $commentedRecipes = Recipe::whereHas('comments', function ($query) use ($userId) {
+        $query->where('user_id', $userId);
+    })->withCount(['likes', 'comments', 'savedByUsers as saved_by_count'])->get();
+
+    return response()->json($commentedRecipes);
+}
+
 }

@@ -46,7 +46,7 @@ class RecipeController extends Controller
           'user_id' => auth()->id(),
           'title' => $validated['title'],
           'description' => $validated['description'],
-          'ingredients' => $validated['ingredients'],
+          'ingredients' => $validated['ingredients'],   
           'steps' => $validated['steps'],
           'image' => $imagePath, // Store the image path in the database
       ]);
@@ -56,7 +56,11 @@ class RecipeController extends Controller
   
   
   
-  
+  public function userCreatedRecipes()
+{
+    return auth()->user()->recipes()->withCount(['likes', 'comments', 'savedByUsers as saved_by_count'])->get();
+}
+
   
   
   public function update(Request $request, Recipe $recipe)

@@ -26,5 +26,9 @@ public function destroy($id)
 
     return response()->json(['message' => 'Recipe unsaved successfully']);
 }
+public function userSavedRecipes()
+{
+    return auth()->user()->savedRecipes()->withCount(['likes', 'comments', 'savedByUsers as saved_by_count'])->get();
+}
 
 }
