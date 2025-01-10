@@ -71,11 +71,21 @@ class _AccSettingPageState extends State<AccSettingPage> {
               padding: const EdgeInsets.all(16.0),
               child: Row(
                 children: [
-                  // Profile Picture
-                  const CircleAvatar(
+                  // Profile Picture: Display first letter of the username
+                  CircleAvatar(
                     radius: 40,
-                    backgroundImage: AssetImage(
-                        'assets/images/profile.png'), // Replace with your profile image
+                    backgroundColor: Colors.blueAccent,
+                    child: Text(
+                      _userName != null && _userName!.isNotEmpty
+                          ? _userName![0]
+                              .toUpperCase() // First letter of the username
+                          : '?',
+                      style: const TextStyle(
+                        fontSize: 40,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
                   ),
                   const SizedBox(width: 16),
                   // Profile Details

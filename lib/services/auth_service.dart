@@ -77,4 +77,6 @@ class AuthService {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString('user_token'); // Retrieves the saved token
   }
+
+  getUser() {}
 }

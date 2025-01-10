@@ -48,7 +48,7 @@ class _CreateRecipePageState extends State<CreateRecipePage> {
         _imageFile,
       );
 
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Recipe created successfully!'),
       ));
 
@@ -76,15 +76,17 @@ class _CreateRecipePageState extends State<CreateRecipePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Create Recipe'),
+        backgroundColor: Colors.orangeAccent,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: SingleChildScrollView(
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Form(
+            key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Title Field
                 TextFormField(
                   controller: _titleController,
                   decoration: const InputDecoration(labelText: 'Title'),
@@ -95,6 +97,8 @@ class _CreateRecipePageState extends State<CreateRecipePage> {
                     return null;
                   },
                 ),
+                const SizedBox(height: 16),
+                // Description Field
                 TextFormField(
                   controller: _descriptionController,
                   decoration: const InputDecoration(labelText: 'Description'),
@@ -105,9 +109,18 @@ class _CreateRecipePageState extends State<CreateRecipePage> {
                     return null;
                   },
                 ),
+                const SizedBox(height: 16),
+                // Ingredients Section
+                const Text(
+                  "Ingredients",
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
                 TextFormField(
                   controller: _ingredientsController,
-                  decoration: const InputDecoration(labelText: 'Ingredients'),
+                  decoration: const InputDecoration(
+                    hintText: "Add Ingredients (comma-separated)",
+                  ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please enter ingredients';
@@ -115,9 +128,18 @@ class _CreateRecipePageState extends State<CreateRecipePage> {
                     return null;
                   },
                 ),
+                const SizedBox(height: 16),
+                // Steps Section
+                const Text(
+                  "Steps",
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
                 TextFormField(
                   controller: _stepsController,
-                  decoration: const InputDecoration(labelText: 'Steps'),
+                  decoration: const InputDecoration(
+                    hintText: "Add Steps (comma-separated)",
+                  ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please enter the steps';
@@ -126,30 +148,36 @@ class _CreateRecipePageState extends State<CreateRecipePage> {
                   },
                 ),
                 const SizedBox(height: 16),
-                Row(
-                  children: [
-                    _imageFile == null
-                        ? const Text('No image selected')
-                        : Image.file(
-                            _imageFile!,
-                            width: 100,
-                            height: 100,
-                            fit: BoxFit.cover,
-                          ),
-                    const SizedBox(width: 16),
-                    ElevatedButton(
-                      onPressed: _pickImage,
-                      child: const Text('Pick Image'),
+                // Add Photo Section
+                GestureDetector(
+                  onTap: _pickImage,
+                  child: Container(
+                    height: 150,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                  ],
+                    child: _imageFile != null
+                        ? Image.file(_imageFile!, fit: BoxFit.cover)
+                        : const Center(
+                            child: Text("Tap to add a photo"),
+                          ),
+                  ),
                 ),
                 const SizedBox(height: 16),
-                _isLoading
-                    ? const Center(child: CircularProgressIndicator())
-                    : ElevatedButton(
-                        onPressed: _submitRecipe,
-                        child: const Text('Create Recipe'),
-                      ),
+                // Submit Button
+                Center(
+                  child: _isLoading
+                      ? const CircularProgressIndicator()
+                      : ElevatedButton(
+                          onPressed: _submitRecipe,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.orangeAccent,
+                          ),
+                          child: const Text("Create Recipe"),
+                        ),
+                ),
               ],
             ),
           ),

@@ -1,222 +1,114 @@
 import 'package:flutter/material.dart';
-import 'package:dio/dio.dart';
-
-List<Map<String, dynamic>> userRecipes = [];
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uas_cookedex/account/acc_setting.dart';
+import 'package:uas_cookedex/services/recipe_service.dart';
+import 'dart:math';
 
 class AccountPage extends StatefulWidget {
-  const AccountPage({super.key});
-
   @override
   _AccountPageState createState() => _AccountPageState();
 }
 
-class _AccountPageState extends State<AccountPage> {
-  String _selectedFilter = "All";
-  String name = "User Name"; // Added to replace provider
-  String bio = "User Bio"; // Added to replace provider
+class _AccountPageState extends State<AccountPage>
+    with SingleTickerProviderStateMixin {
+  late RecipeService _recipeService;
+  late TabController _tabController;
 
-  // Fetch user data from the API
-  Future<void> fetchUserData() async {
-    try {
-      final dio = Dio();
-      final response = await dio.get('http://localhost:8000/api/user-recipes');
-      if (response.statusCode == 200) {
-        setState(() {
-          userRecipes = List<Map<String, dynamic>>.from(response.data);
-        });
-      }
-    } catch (e) {
-      print("Error fetching user data: $e");
-    }
-  }
+  List<dynamic> createdRecipes = [];
+  List<dynamic> likedRecipes = [];
+  List<dynamic> savedRecipes = [];
+  List<dynamic> commentedRecipes = [];
+
+  String? userName;
+  String? userEmail;
 
   @override
   void initState() {
     super.initState();
-    fetchUserData();
+    _recipeService = RecipeService();
+    _tabController = TabController(length: 4, vsync: this);
+    _fetchUserData();
+    _fetchData();
+  }
+
+  // Fetch user data from shared preferences
+  Future<void> _fetchUserData() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      userName = prefs.getString('user_name') ?? 'Loading...';
+      userEmail = prefs.getString('user_email') ?? 'Loading...';
+    });
+  }
+
+  _fetchData() async {
+    try {
+      createdRecipes = await _recipeService.getUserCreatedRecipes();
+      likedRecipes = await _recipeService.getUserLikedRecipes();
+      savedRecipes = await _recipeService.getUserSavedRecipes();
+      commentedRecipes = await _recipeService.getUserCommentedRecipes();
+
+      setState(() {});
+    } catch (e) {
+      print('Error fetching data: $e');
+    }
+  }
+
+  Widget _buildSection(String title, List<dynamic> recipes) {
+    return ListView.builder(
+      itemCount: recipes.length,
+      itemBuilder: (context, index) {
+        var recipe = recipes[index];
+        return ListTile(
+          contentPadding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+          title: Text(recipe['title'],
+              style: TextStyle(fontWeight: FontWeight.bold)),
+          subtitle: Text(recipe['description']),
+          onTap: () {
+            // Navigate to recipe details
+          },
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final filteredPosts = _selectedFilter == "All"
-        ? userRecipes
-        : userRecipes;
-
     return Scaffold(
       appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Colors.white,
+        title: Text('Account Page'),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: Icon(Icons.arrow_back),
           onPressed: () {
             Navigator.pop(context);
           },
         ),
-        title: const Text(
-          "Account",
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        centerTitle: true,
         actions: [
           IconButton(
-            icon: const Icon(Icons.settings, color: Colors.black),
+            icon: Icon(Icons.settings),
             onPressed: () {
-              Navigator.pushNamed(context, '/acc-setting');
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => AccSettingPage()),
+              );
             },
           ),
         ],
       ),
-      backgroundColor: Colors.white,
-      body: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(16),
-                topRight: Radius.circular(16),
-              ),
-            ),
-            child: Column(
-              children: [
-                Text(
-                  name,
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  bio,
-                  style: const TextStyle(fontSize: 14, color: Colors.grey),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-          Expanded(
-            child: DefaultTabController(
-              length: 3,
-              child: Column(
-                children: [
-                  const TabBar(
-                    indicatorColor: Colors.orangeAccent,
-                    labelColor: Colors.orangeAccent,
-                    unselectedLabelColor: Colors.grey,
-                    tabs: [
-                      Tab(child: Text("Posts")),
-                      Tab(child: Text("Reviews")),
-                      Tab(child: Text("Liked Recipes")),
-                    ],
-                  ),
-                  Expanded(
-                    child: TabBarView(
-                      children: [
-                        Column(
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                              child: DropdownButton<String>(
-                                value: _selectedFilter,
-                                isExpanded: true,
-                                items: const [
-                                  DropdownMenuItem(value: "All", child: Text("All Posts")),
-                                  DropdownMenuItem(value: "Recipes", child: Text("Recipes")),
-                                ],
-                                onChanged: (value) {
-                                  setState(() {
-                                    _selectedFilter = value!;
-                                  });
-                                },
-                              ),
-                            ),
-                            Expanded(
-                              child: ListView.builder(
-                                padding: const EdgeInsets.all(16),
-                                itemCount: filteredPosts.length,
-                                itemBuilder: (context, index) {
-                                  final post = filteredPosts[index];
-                                  return _buildPostCard(post);
-                                },
-                              ),
-                            ),
-                          ],
-                        ),
-                        _buildReviewsTab(),
-                        _buildLikedRecipesTab(),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildReviewsTab() {
-    return const Center(
-      child: Text('No reviews yet'),
-    );
-  }
-
-  Widget _buildLikedRecipesTab() {
-    return ListView(
-      padding: const EdgeInsets.all(16),
-      children: [
-        _buildRecipeCard(
-          image: 'assets/images/recipe_user1.jpg',
-          title: "Resep Mie Ayam Jamur",
-          likes: 250,
-          reviews: 120,
-        ),
-        const SizedBox(height: 16),
-        _buildRecipeCard(
-          image: 'assets/images/recipe_user2.jpg',
-          title: "Resep Nasi Goreng Jawa",
-          likes: 320,
-          reviews: 190,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPostCard(dynamic post) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.pushNamed(
-          context,
-          '/recipe-detail',
-          arguments: post
-        );
-      },
-      child: Card(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      body: SingleChildScrollView(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-              child: Image.asset(
-                post['image'],
-                width: double.infinity,
-                height: 150,
-                fit: BoxFit.cover,
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(
-                post['description'],
-                style: const TextStyle(fontSize: 14, color: Colors.grey),
+            _buildProfileSection(),
+            SizedBox(height: 20), // Space between profile and tabs
+            Container(
+              height: 400, // Adjust height based on content
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  _buildSection('Liked Recipes', likedRecipes),
+                  _buildSection('Saved Recipes', savedRecipes),
+                  _buildSection('Commented Recipes', commentedRecipes),
+                  _buildSection('Created Recipes', createdRecipes),
+                ],
               ),
             ),
           ],
@@ -225,67 +117,45 @@ class _AccountPageState extends State<AccountPage> {
     );
   }
 
-  Widget _buildRecipeCard({
-    required String image,
-    required String title,
-    required int likes,
-    required int reviews,
-  }) {
-    return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      elevation: 3,
+  Widget _buildProfileSection() {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          ClipRRect(
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-            child: Image.asset(
-              image,
-              height: 150,
-              width: double.infinity,
-              fit: BoxFit.cover,
+          CircleAvatar(
+            radius: 50,
+            backgroundColor: Colors.blueAccent,
+            child: Text(
+              userName?.isNotEmpty ?? false
+                  ? userName![0].toUpperCase()
+                  : '?', // First letter of the username
+              style: TextStyle(
+                fontSize: 40,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        const Icon(Icons.favorite, size: 16, color: Colors.red),
-                        const SizedBox(width: 4),
-                        Text(
-                          likes.toString(),
-                          style: const TextStyle(fontSize: 12, color: Colors.grey),
-                        ),
-                      ],
-                    ),
-                    Row(
-                      children: [
-                        const Icon(Icons.comment, size: 16, color: Colors.grey),
-                        const SizedBox(width: 4),
-                        Text(
-                          "$reviews Reviews",
-                          style: const TextStyle(fontSize: 12, color: Colors.grey),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ],
-            ),
+          SizedBox(height: 16),
+          Text(
+            userName ?? "User Name",
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          ),
+          SizedBox(height: 8),
+          Text(
+            userEmail ?? "user@example.com",
+            style: TextStyle(fontSize: 16, color: Colors.grey),
+          ),
+          SizedBox(height: 20), // Adding space between profile and tabs
+          TabBar(
+            controller: _tabController,
+            tabs: [
+              Tab(text: 'Liked'),
+              Tab(text: 'Saved'),
+              Tab(text: 'Commented'),
+              Tab(text: 'Created'),
+            ],
           ),
         ],
       ),

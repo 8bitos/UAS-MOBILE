@@ -1,9 +1,10 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart'; // Import intl package for date formatting
+import 'package:intl/intl.dart';
 import 'package:uas_cookedex/home/create_recipe.dart';
 import 'package:uas_cookedex/services/recipe_service.dart';
-import 'package:uas_cookedex/services/auth_service.dart';
-import 'recipe_detail_page.dart'; // Import the detail page
+import 'package:shared_preferences/shared_preferences.dart';
+import 'recipe_detail_page.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -13,145 +14,147 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final _recipeService = RecipeService();
   List<dynamic> _recipes = [];
+  List<dynamic> _filteredRecipes = [];
   bool _isLoading = false;
   int _selectedIndex = 0;
-  int _currentPage = 1; // Track current page for pagination
-  bool _allRecipesLoaded = false; // Flag to check if all recipes are loaded
-  ScrollController _scrollController = ScrollController();
+  bool _isSearching = false;
+  TextEditingController _searchController = TextEditingController();
+  String? _userName; // Add user name field
 
+  @override
   @override
   void initState() {
     super.initState();
-    _loadRecipes(page: _currentPage);
+    _loadUserData(); // Load user data
+    _loadRecipes(); // Load recipes once when the page is initialized
+    _loadSortPreference(); // Load sort preference if it exists
+  }
 
-    // Set up scroll controller to detect when the user reaches the bottom
-    _scrollController.addListener(() {
-      if (_scrollController.position.pixels ==
-              _scrollController.position.maxScrollExtent &&
-          !_allRecipesLoaded) {
-        _loadRecipes(
-            page:
-                _currentPage + 1); // Load next page when scrolled to the bottom
-      }
+  Future<void> _loadSortPreference() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedSortOption = prefs.getString('sort_option');
+    if (savedSortOption != null) {
+      _onSortSelected(savedSortOption);
+    }
+  }
+
+  // Function to load user data from shared preferences
+  Future<void> _loadUserData() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _userName = prefs.getString('user_name') ?? 'User'; // Get username
     });
   }
 
-  // Function to load recipes from the API
-  void _loadRecipes({int page = 1}) async {
-    if (_isLoading || _allRecipesLoaded)
-      return; // Prevent multiple API calls and avoid loading if all data is loaded
+  void _loadRecipes() async {
+    if (_isLoading) return;
     setState(() {
       _isLoading = true;
     });
-    final recipes = await _recipeService.getRecipes(page: page);
 
-    if (recipes.isNotEmpty) {
+    try {
+      final recipes = await _recipeService.getRecipes(page: 0);
       setState(() {
         _isLoading = false;
-        _recipes.addAll(recipes); // Add new recipes to the list
-        _currentPage = page; // Update the current page
-        if (recipes.length < 10) {
-          // If fewer than 10 recipes are loaded, mark it as the last page
-          _allRecipesLoaded = true;
-        }
+        _recipes = recipes;
+        _filteredRecipes = recipes;
       });
-    } else {
+
+      // Apply sorting if a sort option is selected
+      if (_currentSortOption.isNotEmpty) {
+        _onSortSelected(_currentSortOption);
+      }
+    } catch (e) {
       setState(() {
         _isLoading = false;
-        _allRecipesLoaded =
-            true; // Mark all recipes loaded if no data is returned
       });
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Failed to load recipes: $e'),
+      ));
     }
   }
 
-  // Function to handle pull-to-refresh
   Future<void> _refreshRecipes() async {
     setState(() {
-      _recipes.clear(); // Clear current list of recipes
-      _currentPage = 1; // Reset page to 1
-      _allRecipesLoaded = false; // Reset the flag for reloading
+      _recipes.clear(); // Clear the existing recipes
     });
-    _loadRecipes(page: _currentPage); // Reload the first page of recipes
-  }
 
-  // Function to toggle like status of a recipe
-  Future<void> _toggleLike(int recipeId, bool isLiked, int index) async {
-    try {
-      if (isLiked) {
-        await _recipeService.unlikeRecipe(recipeId);
-        setState(() {
-          _recipes[index]['is_liked'] = false;
-          _recipes[index]['likes_count'] -= 1;
-        });
-      } else {
-        await _recipeService.likeRecipe(recipeId);
-        setState(() {
-          _recipes[index]['is_liked'] = true;
-          _recipes[index]['likes_count'] += 1;
-        });
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Failed to toggle like: $e'),
-      ));
+    // Reload the recipes
+    _loadRecipes();
+
+    // Reapply the current sort order
+    if (_filteredRecipes.isNotEmpty) {
+      _onSortSelected(_currentSortOption);
     }
   }
 
-  // Function to toggle save status of a recipe
-  Future<void> _toggleSave(int recipeId, bool isSaved, int index) async {
-    try {
-      if (isSaved) {
-        await _recipeService.unsaveRecipe(recipeId);
-        setState(() {
-          _recipes[index]['is_saved'] = false;
-        });
-      } else {
-        await _recipeService.saveRecipe(recipeId);
-        setState(() {
-          _recipes[index]['is_saved'] = true;
-        });
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Failed to toggle save: $e'),
-      ));
+  String _currentSortOption = 'Latest-Newest'; // Default sorting option
+
+  void _onSearchChanged(String query) {
+    setState(() {
+      _filteredRecipes = _recipes
+          .where((recipe) =>
+              recipe['title'].toLowerCase().contains(query.toLowerCase()))
+          .toList();
+    });
+  }
+
+  void _onSearchButtonPressed() {
+    setState(() {
+      _isSearching = !_isSearching;
+    });
+    if (!_isSearching) {
+      _searchController.clear();
+      _filteredRecipes = _recipes;
     }
   }
 
-  void _onFabClick(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      builder: (context) => Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: Icon(Icons.book),
-              title: Text('Add Cookbook'),
-              onTap: () {
-                Navigator.pop(context);
-                // Navigate to add cookbook
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.receipt),
-              title: Text('Add Recipe'),
-              onTap: () {
-                Navigator.pop(context);
-                // Navigate to add recipe
-              },
-            ),
-          ],
-        ),
-      ),
-    );
+  Future<void> _onSortSelected(String option) async {
+    setState(() {
+      _currentSortOption = option; // Store the selected sort option
+    });
+
+    // Save the selected option in SharedPreferences to persist the choice
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setString('sort_option', option);
+
+    switch (option) {
+      case 'A-Z':
+        _filteredRecipes.sort((a, b) =>
+            a['title'].toLowerCase().compareTo(b['title'].toLowerCase()));
+        break;
+      case 'Z-A':
+        _filteredRecipes.sort((a, b) =>
+            b['title'].toLowerCase().compareTo(a['title'].toLowerCase()));
+        break;
+      case 'Latest-Newest':
+        _filteredRecipes.sort((a, b) => DateTime.parse(a['created_at'])
+            .compareTo(DateTime.parse(b['created_at'])));
+        break;
+      case 'Newest-Latest':
+        _filteredRecipes.sort((a, b) => DateTime.parse(b['created_at'])
+            .compareTo(DateTime.parse(a['created_at'])));
+        break;
+      case 'Most-Liked':
+        _filteredRecipes
+            .sort((a, b) => b['likes_count'].compareTo(a['likes_count']));
+        break;
+      case 'Least-Liked':
+        _filteredRecipes
+            .sort((a, b) => a['likes_count'].compareTo(b['likes_count']));
+        break;
+    }
   }
 
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   @override
@@ -173,9 +176,19 @@ class _HomePageState extends State<HomePage> {
                     onTap: () {
                       Navigator.pushNamed(context, '/account');
                     },
-                    child: const CircleAvatar(
-                      backgroundImage: AssetImage('assets/images/profile.png'),
+                    child: CircleAvatar(
                       radius: 25,
+                      backgroundColor: Colors.blueAccent,
+                      child: Text(
+                        _userName != null && _userName!.isNotEmpty
+                            ? _userName![0].toUpperCase()
+                            : '?',
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -184,7 +197,7 @@ class _HomePageState extends State<HomePage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        "Hi User", // Ganti dengan nama pengguna jika tersedia
+                        _userName ?? "Hi User", // Display username
                         style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -202,13 +215,34 @@ class _HomePageState extends State<HomePage> {
                   ),
                   const Spacer(),
                   IconButton(
-                    icon: const Icon(Icons.notifications_outlined,
-                        color: Colors.black),
+                    icon: Icon(
+                      _isSearching ? Icons.cancel : Icons.search,
+                      color: Colors.black,
+                    ),
                     iconSize: 28,
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/notification');
-                    },
+                    onPressed: _onSearchButtonPressed,
                   ),
+                  PopupMenuButton<String>(
+                    icon: const Icon(Icons.sort, color: Colors.black),
+                    onSelected: _onSortSelected,
+                    itemBuilder: (context) => [
+                      const PopupMenuItem(
+                          value: 'A-Z', child: Text('Sort A-Z')),
+                      const PopupMenuItem(
+                          value: 'Z-A', child: Text('Sort Z-A')),
+                      const PopupMenuItem(
+                          value: 'Latest-Newest',
+                          child: Text('Sort Latest-Newest')),
+                      const PopupMenuItem(
+                          value: 'Newest-Latest',
+                          child: Text('Sort Newest-Latest')),
+                      const PopupMenuItem(
+                          value: 'Most-Liked', child: Text('Sort Most Liked')),
+                      const PopupMenuItem(
+                          value: 'Least-Liked',
+                          child: Text('Sort Least Liked')),
+                    ],
+                  )
                 ],
               ),
             ),
@@ -218,14 +252,26 @@ class _HomePageState extends State<HomePage> {
       body: _isLoading && _recipes.isEmpty
           ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(
-              onRefresh: _refreshRecipes, // Add pull-to-refresh functionality
+              onRefresh: _refreshRecipes,
               child: SingleChildScrollView(
-                controller: _scrollController, // Add scroll controller
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      if (_isSearching)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 16.0),
+                          child: TextField(
+                            controller: _searchController,
+                            onChanged: _onSearchChanged,
+                            decoration: const InputDecoration(
+                              labelText: 'Search recipes...',
+                              border: OutlineInputBorder(),
+                              prefixIcon: Icon(Icons.search),
+                            ),
+                          ),
+                        ),
                       const Text(
                         "Featured Community Recipes",
                         style: TextStyle(
@@ -241,9 +287,8 @@ class _HomePageState extends State<HomePage> {
                           color: Colors.grey,
                         ),
                       ),
-                      ..._recipes.map((recipe) {
+                      ..._filteredRecipes.map((recipe) {
                         final bool isLiked = recipe['is_liked'] ?? false;
-                        final bool isSaved = recipe['is_saved'] ?? false;
                         final String createdAt = recipe['created_at'] != null
                             ? DateFormat('d MMMM yyyy').format(
                                 DateTime.parse(recipe['created_at']).toLocal())
@@ -336,7 +381,14 @@ class _HomePageState extends State<HomePage> {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => CreateRecipePage()),
-          );
+          ).then((reload) {
+            // Reload only if the callback returns true
+            if (reload == true) {
+              setState(() {
+                _loadRecipes(); // Reload recipes when returning
+              });
+            }
+          });
         },
         backgroundColor: Colors.orangeAccent,
         child: const Icon(Icons.add),
@@ -357,15 +409,7 @@ class _HomePageState extends State<HomePage> {
             label: "",
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.search, size: 28),
-            label: "",
-          ),
-          BottomNavigationBarItem(
             icon: Icon(Icons.chat, size: 28),
-            label: "",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_month, size: 28),
             label: "",
           ),
         ],

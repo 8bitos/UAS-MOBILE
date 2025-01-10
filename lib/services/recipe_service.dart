@@ -98,6 +98,52 @@ class RecipeService {
     );
   }
 
+  // Fetch comments for a specific recipe
+// Fetch comments for a specific recipe
+  Future<List<dynamic>> getComments(int recipeId) async {
+    final token = await _authService.getToken();
+    if (token == null) {
+      throw Exception('Token not found. Please log in again.');
+    }
+
+    final response = await _dio.get(
+      'http://localhost:8000/api/recipes/$recipeId/comments',
+      options: Options(
+        headers: {'Authorization': 'Bearer $token'},
+      ),
+    );
+
+    print('API Response: ${response.data}'); // Log response
+
+    try {
+      final data = response.data;
+
+      // Since the response is directly a list, we can return it
+      if (data is List) {
+        return data; // Directly return the list of comments
+      } else {
+        throw Exception('Unexpected response structure: ${response.data}');
+      }
+    } catch (e) {
+      throw Exception('Failed to parse comments: $e');
+    }
+  }
+
+  // Delete a specific comment
+  Future<void> deleteComment(int commentId) async {
+    final token = await _authService.getToken();
+    if (token == null) {
+      throw Exception('Token not found. Please log in again.');
+    }
+
+    await _dio.delete(
+      'http://localhost:8000/api/comments/$commentId',
+      options: Options(
+        headers: {'Authorization': 'Bearer $token'},
+      ),
+    );
+  }
+
   // Create a new recipe
   Future<void> createRecipe(
     String title,
@@ -131,5 +177,69 @@ class RecipeService {
     } catch (e) {
       throw Exception('Failed to create recipe: $e');
     }
+  }
+
+  // Fetch user-created recipes
+  Future<List<dynamic>> getUserCreatedRecipes() async {
+    final token = await _authService.getToken();
+    if (token == null) {
+      throw Exception('Token not found. Please log in again.');
+    }
+
+    final response = await _dio.get(
+      'http://127.0.0.1:8000/api/user/created-recipes', // Adjust to your API
+      options: Options(
+        headers: {'Authorization': 'Bearer $token'},
+      ),
+    );
+    return response.data;
+  }
+
+  // Fetch user-liked recipes
+  Future<List<dynamic>> getUserLikedRecipes() async {
+    final token = await _authService.getToken();
+    if (token == null) {
+      throw Exception('Token not found. Please log in again.');
+    }
+
+    final response = await _dio.get(
+      'http://127.0.0.1:8000/api/user/liked-recipes', // Adjust to your API
+      options: Options(
+        headers: {'Authorization': 'Bearer $token'},
+      ),
+    );
+    return response.data;
+  }
+
+  // Fetch user-saved recipes
+  Future<List<dynamic>> getUserSavedRecipes() async {
+    final token = await _authService.getToken();
+    if (token == null) {
+      throw Exception('Token not found. Please log in again.');
+    }
+
+    final response = await _dio.get(
+      'http://127.0.0.1:8000/api/user/saved-recipes', // Adjust to your API
+      options: Options(
+        headers: {'Authorization': 'Bearer $token'},
+      ),
+    );
+    return response.data;
+  }
+
+  // Fetch user-commented recipes
+  Future<List<dynamic>> getUserCommentedRecipes() async {
+    final token = await _authService.getToken();
+    if (token == null) {
+      throw Exception('Token not found. Please log in again.');
+    }
+
+    final response = await _dio.get(
+      'http://127.0.0.1:8000/api/user/commented-recipes', // Adjust to your API
+      options: Options(
+        headers: {'Authorization': 'Bearer $token'},
+      ),
+    );
+    return response.data;
   }
 }

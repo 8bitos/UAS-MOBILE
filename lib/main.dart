@@ -63,7 +63,7 @@ class MyApp extends StatelessWidget {
         '/': (context) => const SplashScreen(),
         '/authscreen': (context) => const AuthScreen(),
         '/home': (context) => HomePage(),
-        '/account': (context) => const AccountPage(),
+        '/account': (context) => AccountPage(),
         '/notification': (context) => const NotificationPage(),
         '/community-recipes': (context) => const CommunityPage(),
         '/acc-setting': (context) => const AccSettingPage(),
