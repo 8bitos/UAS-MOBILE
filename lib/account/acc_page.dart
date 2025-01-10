@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../provider/user_provider.dart';
 import 'package:dio/dio.dart';
 
 List<Map<String, dynamic>> userRecipes = [];
@@ -13,7 +11,9 @@ class AccountPage extends StatefulWidget {
 }
 
 class _AccountPageState extends State<AccountPage> {
-  String _selectedFilter = "All"; // Default filter: show all
+  String _selectedFilter = "All";
+  String name = "User Name"; // Added to replace provider
+  String bio = "User Bio"; // Added to replace provider
 
   // Fetch user data from the API
   Future<void> fetchUserData() async {
@@ -33,17 +33,14 @@ class _AccountPageState extends State<AccountPage> {
   @override
   void initState() {
     super.initState();
-    fetchUserData(); // Fetch user data when the page is loaded
+    fetchUserData();
   }
 
   @override
   Widget build(BuildContext context) {
-    final userProvider = Provider.of<UserProvider>(context);
-
-    // Filtered posts based on dropdown selection
     final filteredPosts = _selectedFilter == "All"
         ? userRecipes
-        : userRecipes; // Modify if needed for more filters
+        : userRecipes;
 
     return Scaffold(
       appBar: AppBar(
@@ -76,7 +73,6 @@ class _AccountPageState extends State<AccountPage> {
       backgroundColor: Colors.white,
       body: Column(
         children: [
-          // Profile Header (without Edit button and profile image)
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             decoration: const BoxDecoration(
@@ -89,7 +85,7 @@ class _AccountPageState extends State<AccountPage> {
             child: Column(
               children: [
                 Text(
-                  userProvider.name,
+                  name,
                   style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
@@ -97,14 +93,13 @@ class _AccountPageState extends State<AccountPage> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  userProvider.bio,
+                  bio,
                   style: const TextStyle(fontSize: 14, color: Colors.grey),
                 ),
               ],
             ),
           ),
           const SizedBox(height: 16),
-          // TabBar
           Expanded(
             child: DefaultTabController(
               length: 3,
@@ -123,20 +118,16 @@ class _AccountPageState extends State<AccountPage> {
                   Expanded(
                     child: TabBarView(
                       children: [
-                        // Posts Tab
                         Column(
                           children: [
                             Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 16.0),
+                              padding: const EdgeInsets.symmetric(horizontal: 16.0),
                               child: DropdownButton<String>(
                                 value: _selectedFilter,
                                 isExpanded: true,
                                 items: const [
-                                  DropdownMenuItem(
-                                      value: "All", child: Text("All Posts")),
-                                  DropdownMenuItem(
-                                      value: "Recipes", child: Text("Recipes")),
+                                  DropdownMenuItem(value: "All", child: Text("All Posts")),
+                                  DropdownMenuItem(value: "Recipes", child: Text("Recipes")),
                                 ],
                                 onChanged: (value) {
                                   setState(() {
@@ -157,9 +148,7 @@ class _AccountPageState extends State<AccountPage> {
                             ),
                           ],
                         ),
-                        // Reviews Tab
                         _buildReviewsTab(),
-                        // Liked Recipes Tab
                         _buildLikedRecipesTab(),
                       ],
                     ),
@@ -203,19 +192,19 @@ class _AccountPageState extends State<AccountPage> {
   Widget _buildPostCard(dynamic post) {
     return GestureDetector(
       onTap: () {
-        Navigator.pushNamed(context, '/recipe-detail',
-            arguments: post // Pass all recipe data
-            );
+        Navigator.pushNamed(
+          context,
+          '/recipe-detail',
+          arguments: post
+        );
       },
       child: Card(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Image Section
             ClipRRect(
-              borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(12)),
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
               child: Image.asset(
                 post['image'],
                 width: double.infinity,
@@ -279,8 +268,7 @@ class _AccountPageState extends State<AccountPage> {
                         const SizedBox(width: 4),
                         Text(
                           likes.toString(),
-                          style:
-                              const TextStyle(fontSize: 12, color: Colors.grey),
+                          style: const TextStyle(fontSize: 12, color: Colors.grey),
                         ),
                       ],
                     ),
@@ -290,8 +278,7 @@ class _AccountPageState extends State<AccountPage> {
                         const SizedBox(width: 4),
                         Text(
                           "$reviews Reviews",
-                          style:
-                              const TextStyle(fontSize: 12, color: Colors.grey),
+                          style: const TextStyle(fontSize: 12, color: Colors.grey),
                         ),
                       ],
                     ),

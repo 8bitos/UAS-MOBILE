@@ -118,6 +118,36 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  void _onFabClick(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: Icon(Icons.book),
+              title: Text('Add Cookbook'),
+              onTap: () {
+                Navigator.pop(context);
+                // Navigate to add cookbook
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.receipt),
+              title: Text('Add Recipe'),
+              onTap: () {
+                Navigator.pop(context);
+                // Navigate to add recipe
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
@@ -127,8 +157,63 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Home'),
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(100),
+        child: Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+          ),
+          child: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.pushNamed(context, '/account');
+                    },
+                    child: const CircleAvatar(
+                      backgroundImage: AssetImage('assets/images/profile.png'),
+                      radius: 25,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "Hi User", // Ganti dengan nama pengguna jika tersedia
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      ),
+                      const Text(
+                        "What are you cooking today?",
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const Spacer(),
+                  IconButton(
+                    icon: const Icon(Icons.notifications_outlined,
+                        color: Colors.black),
+                    iconSize: 28,
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/notification');
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
       ),
       body: _isLoading && _recipes.isEmpty
           ? const Center(child: CircularProgressIndicator())
