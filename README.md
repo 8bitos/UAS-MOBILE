@@ -1,16 +1,35 @@
-# uas_cookedex
+# 📱 Aplikasi Resep Masak
 
-A new Flutter project.
+## 👥 Anggota Kelompok 3
 
-## Getting Started
+1. **I Gusti Nyoman Sapta Wiguna** (2215051041)  
+2. **Malika Pradnya Hapsari** (2215051034)  
+3. **Anak Agung Gede Pradnya Prameswara** (2215051040)  
+4. **Mohammad Rezzy Al Zamzammi** (2215051104)  
+5. **M Farhil Amani** (2215051021)  
 
-This project is a starting point for a Flutter application.
 
-A few resources to get you started if this is your first Flutter project:
+Proyek ini merupakan hasil tugas akhir mata kuliah **Mobile & Cloud**. Aplikasi ini dirancang untuk memudahkan pengguna mencari, menyimpan, dan mengikuti resep masakan dengan antarmuka yang sederhana dan user-friendly.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+---
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## ✨ Fitur Aplikasi
+
+- 🔍 **Cari Resep**: Temukan berbagai resep berdasarkan nama atau kategori.
+- 📖 **Detail Resep**: Lihat bahan dan langkah-langkah memasak secara detail.
+- 💾 **Simpan Resep Favorit**: Simpan resep yang Anda sukai untuk akses cepat di lain waktu.
+- 🌐 **Offline Mode**: Akses resep yang sudah tersimpan tanpa koneksi internet.
+
+---
+
+## 📋 Teknologi yang Digunakan
+
+- **Frontend**: [Flutter](https://flutter.dev/)
+- **Backend**: Laravel
+---
+
+## 🛠️ Cara Menjalankan Aplikasi
+
+1. Clone repository ini:
+   ```bash
+   git clone https://github.com/8bitos/UAS-MOBILE.git
