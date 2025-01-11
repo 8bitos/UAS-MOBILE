@@ -18,7 +18,6 @@ Proyek ini merupakan hasil tugas akhir mata kuliah **Mobile & Cloud**. Aplikasi 
 - 🔍 **Cari Resep**: Temukan berbagai resep berdasarkan nama atau kategori.
 - 📖 **Detail Resep**: Lihat bahan dan langkah-langkah memasak secara detail.
 - 💾 **Simpan Resep Favorit**: Simpan resep yang Anda sukai untuk akses cepat di lain waktu.
-- 🌐 **Offline Mode**: Akses resep yang sudah tersimpan tanpa koneksi internet.
 
 ---
 
