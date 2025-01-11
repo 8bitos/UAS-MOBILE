@@ -22,6 +22,7 @@ class _AccountPageState extends State<AccountPage>
 
   String? userName;
   String? userEmail;
+  bool _isLoading = true;
 
   @override
   void initState() {
@@ -30,6 +31,12 @@ class _AccountPageState extends State<AccountPage>
     _tabController = TabController(length: 4, vsync: this);
     _fetchUserData();
     _fetchData();
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
   }
 
   // Fetch user data from shared preferences
@@ -41,16 +48,19 @@ class _AccountPageState extends State<AccountPage>
     });
   }
 
-  _fetchData() async {
+  // Fetch data from RecipeService
+  Future<void> _fetchData() async {
     try {
       createdRecipes = await _recipeService.getUserCreatedRecipes();
       likedRecipes = await _recipeService.getUserLikedRecipes();
       savedRecipes = await _recipeService.getUserSavedRecipes();
       commentedRecipes = await _recipeService.getUserCommentedRecipes();
-
-      setState(() {});
     } catch (e) {
       print('Error fetching data: $e');
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
@@ -59,15 +69,40 @@ class _AccountPageState extends State<AccountPage>
       itemCount: recipes.length,
       itemBuilder: (context, index) {
         var recipe = recipes[index];
-        return ListTile(
-          contentPadding:
-              const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-          title: Text(recipe['title'],
-              style: const TextStyle(fontWeight: FontWeight.bold)),
-          subtitle: Text(recipe['description']),
-          onTap: () {
-            // Navigate to recipe details
-          },
+        return Card(
+          margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+          elevation: 4,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10.0),
+          ),
+          child: InkWell(
+            onTap: () {
+              // Navigate to RecipeDetailPage
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    recipe['title'],
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    recipe['description'],
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         );
       },
     );
@@ -103,15 +138,17 @@ class _AccountPageState extends State<AccountPage>
             const SizedBox(height: 20), // Space between profile and tabs
             SizedBox(
               height: 400, // Adjust height based on content
-              child: TabBarView(
-                controller: _tabController,
-                children: [
-                  _buildSection('Liked Recipes', likedRecipes),
-                  _buildSection('Saved Recipes', savedRecipes),
-                  _buildSection('Commented Recipes', commentedRecipes),
-                  _buildSection('Created Recipes', createdRecipes),
-                ],
-              ),
+              child: _isLoading
+                  ? Center(child: CircularProgressIndicator())
+                  : TabBarView(
+                      controller: _tabController,
+                      children: [
+                        _buildSection('Liked Recipes', likedRecipes),
+                        _buildSection('Saved Recipes', savedRecipes),
+                        _buildSection('Commented Recipes', commentedRecipes),
+                        _buildSection('Created Recipes', createdRecipes),
+                      ],
+                    ),
             ),
           ],
         ),

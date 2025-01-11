@@ -144,11 +144,8 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       _selectedIndex = index;
     });
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
+    // Reload the data whenever the page is changed
+    _loadRecipes();
   }
 
   @override
