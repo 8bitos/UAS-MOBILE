@@ -1,7 +1,4 @@
 import 'package:dio/dio.dart';
-import 'package:flutter/material.dart';
-import 'package:uas_cookedex/models/recipe_model.dart';
-import 'package:dio/dio.dart';
 
 class UserService {
   final Dio _dio = Dio();

@@ -4,6 +4,8 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 
 class CreateRecipePage extends StatefulWidget {
+  const CreateRecipePage({super.key});
+
   @override
   _CreateRecipePageState createState() => _CreateRecipePageState();
 }

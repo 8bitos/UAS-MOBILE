@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:uas_cookedex/home/tes.dart';
 import 'provider/user_provider.dart'; // Alias for main UserProvider
 import 'package:provider/provider.dart';
 import 'package:uas_cookedex/account/acc_credentials_edit.dart';
@@ -13,7 +12,7 @@ import 'package:uas_cookedex/screens/splash_screen.dart';
 import 'package:uas_cookedex/home/home.dart';
 import 'package:uas_cookedex/account/acc_page.dart';
 import 'package:uas_cookedex/account/acc_setting.dart';
-import 'cookbook/cookbook_detailed.dart'; // Alias for cookbook_detailed
+// Alias for cookbook_detailed
 import 'community/review_page.dart';
 import 'community/grocery_list.dart';
 import 'community/edit_recipe.dart';
@@ -21,7 +20,6 @@ import 'community/add_recipe.dart';
 import 'screens/auth_screen.dart';
 import 'screens/forgot_pass_screen.dart';
 import 'provider/notification_service.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -67,7 +65,7 @@ class MyApp extends StatelessWidget {
         '/notification': (context) => const NotificationPage(),
         '/community-recipes': (context) => const CommunityPage(),
         '/acc-setting': (context) => const AccSettingPage(),
-        '/acc-credentials': (context) => AccountCredentialsPage(),
+        '/acc-credentials': (context) => const AccountCredentialsPage(),
         '/forgot-pass': (context) => const ForgotPasswordScreen(),
         '/edit-profile': (context) => const EditProfilePage(
               initialData: {

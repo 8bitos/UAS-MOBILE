@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uas_cookedex/screens/e-mail_login_screen.dart';
-import 'package:uas_cookedex/services/auth_service.dart';
 
 class AccSettingPage extends StatefulWidget {
   const AccSettingPage({super.key});

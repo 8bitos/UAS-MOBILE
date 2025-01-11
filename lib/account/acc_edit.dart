@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
-import 'package:uas_cookedex/screens/e-mail_login_screen.dart';
 
 class EditProfilePage extends StatefulWidget {
   final Map<String, dynamic>
       initialData; // Accept initial data from AccountPage
 
-  const EditProfilePage({Key? key, required this.initialData})
-      : super(key: key);
+  const EditProfilePage({super.key, required this.initialData});
 
   @override
   _EditProfilePageState createState() => _EditProfilePageState();
@@ -173,7 +171,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   // Name Field
                   TextFormField(
                     controller: _nameController,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       labelText: "Profile Name",
                     ),
                     maxLength: 24,
@@ -192,7 +190,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   // Bio Field
                   TextFormField(
                     controller: _bioController,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       labelText: "Bio",
                     ),
                     maxLength: 100,
@@ -212,12 +210,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
               padding: const EdgeInsets.all(16.0),
               child: ElevatedButton(
                 onPressed: _saveChanges,
-                child: const Text("Save"),
                 style: ElevatedButton.styleFrom(
                   minimumSize:
                       const Size(double.infinity, 50), // Full width button
                   backgroundColor: Colors.orangeAccent,
                 ),
+                child: const Text("Save"),
               ),
             ),
           ],

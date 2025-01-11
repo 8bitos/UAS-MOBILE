@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:dio/dio.dart';
-import 'package:uas_cookedex/home/home.dart';
-import 'splash_screen.dart';
+
 import 'e-mail_login_screen.dart';
 
 class AuthScreen extends StatefulWidget {
@@ -47,7 +46,7 @@ class _AuthScreenState extends State<AuthScreen> {
       }
     } catch (e) {
       // Handle error
-      if (e is DioError) {
+      if (e is DioException) {
         final errorMessage =
             e.response?.data['message'] ?? 'Something went wrong!';
         ScaffoldMessenger.of(context).showSnackBar(

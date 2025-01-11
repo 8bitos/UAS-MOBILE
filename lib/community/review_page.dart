@@ -8,11 +8,11 @@ class ReviewsPage extends StatefulWidget {
   final List<Map<String, dynamic>> reviews;
 
   const ReviewsPage({
-    Key? key,
+    super.key,
     required this.recipeTitle,
     required this.rating,
     required this.reviews,
-  }) : super(key: key);
+  });
 
   @override
   State<ReviewsPage> createState() => _ReviewsPageState();

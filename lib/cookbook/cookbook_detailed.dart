@@ -35,7 +35,7 @@ class _CookbookDetailPageState extends State<CookbookDetailPage> {
     if (cookbook != null) {
       try {
         photo = cookbook['image'];
-        if (photo == null || photo.isEmpty) {
+        if (photo.isEmpty) {
           photo = 'assets/images/default_recipe.jpg';
         }
       } catch (e) {

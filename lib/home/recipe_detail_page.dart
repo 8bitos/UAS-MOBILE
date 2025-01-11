@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:uas_cookedex/services/recipe_service.dart';
-import 'package:uas_cookedex/services/auth_service.dart';
 import 'package:uas_cookedex/services/image_search_service.dart'; // Import the image search service
 
 class RecipeDetailPage extends StatefulWidget {
   final dynamic recipe;
 
-  RecipeDetailPage({required this.recipe});
+  const RecipeDetailPage({super.key, required this.recipe});
 
   @override
   _RecipeDetailPageState createState() => _RecipeDetailPageState();
@@ -14,7 +13,6 @@ class RecipeDetailPage extends StatefulWidget {
 
 class _RecipeDetailPageState extends State<RecipeDetailPage> {
   final RecipeService _recipeService = RecipeService();
-  final AuthService _authService = AuthService();
   final ImageSearchService _imageSearchService = ImageSearchService();
   bool _showReviews = false;
   List<dynamic> _comments = [];
@@ -146,19 +144,20 @@ class _RecipeDetailPageState extends State<RecipeDetailPage> {
                       width: double.infinity,
                       fit: BoxFit.cover,
                     ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               Text(
                 recipe['title'] ?? 'Untitled Recipe',
-                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                style:
+                    const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
               ),
-              SizedBox(height: 8),
+              const SizedBox(height: 8),
               Text(
                 'By: ${recipe['user']['name'] ?? 'Unknown'}',
-                style: TextStyle(fontSize: 16, color: Colors.grey),
+                style: const TextStyle(fontSize: 16, color: Colors.grey),
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               Text(recipe['description'] ?? 'No description available.'),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -180,7 +179,7 @@ class _RecipeDetailPageState extends State<RecipeDetailPage> {
                   Text('${recipe['saved_by_count']} Saves'),
                 ],
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () {
                   if (!_showReviews) _fetchComments();
@@ -191,9 +190,9 @@ class _RecipeDetailPageState extends State<RecipeDetailPage> {
                 child: Text(_showReviews ? 'Hide Reviews' : 'Show Reviews'),
               ),
               if (_showReviews) ...[
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 _isLoadingComments
-                    ? Center(child: CircularProgressIndicator())
+                    ? const Center(child: CircularProgressIndicator())
                     : Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -202,7 +201,7 @@ class _RecipeDetailPageState extends State<RecipeDetailPage> {
                                 subtitle: Text(
                                     'By: ${comment['user']['name'] ?? 'Unknown'}'),
                                 trailing: IconButton(
-                                  icon: Icon(Icons.delete),
+                                  icon: const Icon(Icons.delete),
                                   onPressed: () async {
                                     // Add delete comment logic if needed
                                   },
@@ -212,9 +211,9 @@ class _RecipeDetailPageState extends State<RecipeDetailPage> {
                             controller: _commentController,
                             decoration: InputDecoration(
                               labelText: 'Add a comment',
-                              border: OutlineInputBorder(),
+                              border: const OutlineInputBorder(),
                               suffixIcon: IconButton(
-                                icon: Icon(Icons.send),
+                                icon: const Icon(Icons.send),
                                 onPressed: _addComment,
                               ),
                             ),

@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../provider/user_provider.dart';
-import '../home/review_dialog.dart';
 
 class RecipeDetailPage extends StatefulWidget {
   final String title;
@@ -16,7 +15,7 @@ class RecipeDetailPage extends StatefulWidget {
   final String category;
 
   const RecipeDetailPage({
-    Key? key,
+    super.key,
     required this.title,
     required this.image,
     required this.description,
@@ -25,7 +24,7 @@ class RecipeDetailPage extends StatefulWidget {
     required this.ingredients,
     required this.steps,
     required this.category,
-  }) : super(key: key);
+  });
 
   @override
   _RecipeDetailPageState createState() => _RecipeDetailPageState();
@@ -151,7 +150,7 @@ class _RecipeDetailPageState extends State<RecipeDetailPage> {
                     ),
                   ],
                 );
-              }).toList(),
+              }),
               const SizedBox(height: 16),
               const Text(
                 "Steps",
@@ -168,7 +167,7 @@ class _RecipeDetailPageState extends State<RecipeDetailPage> {
                     style: GoogleFonts.poppins(fontSize: 16),
                   ),
                 );
-              }).toList(),
+              }),
             ],
           ),
         ),

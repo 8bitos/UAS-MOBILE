@@ -8,6 +8,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'recipe_detail_page.dart';
 
 class HomePage extends StatefulWidget {
+  const HomePage({super.key});
+
   @override
   _HomePageState createState() => _HomePageState();
 }
@@ -19,7 +21,7 @@ class _HomePageState extends State<HomePage> {
   bool _isLoading = false;
   int _selectedIndex = 0;
   bool _isSearching = false;
-  TextEditingController _searchController = TextEditingController();
+  final TextEditingController _searchController = TextEditingController();
   String? _userName;
 
   @override
@@ -284,7 +286,6 @@ class _HomePageState extends State<HomePage> {
                             ),
                           ),
                           ..._filteredRecipes.map((recipe) {
-                            final bool isLiked = recipe['is_liked'] ?? false;
                             final String createdAt =
                                 recipe['created_at'] != null
                                     ? DateFormat('d MMMM yyyy').format(
@@ -363,7 +364,7 @@ class _HomePageState extends State<HomePage> {
                                 ),
                               ),
                             );
-                          }).toList(),
+                          }),
                           _isLoading
                               ? const Padding(
                                   padding: EdgeInsets.symmetric(vertical: 16),
@@ -376,7 +377,7 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
                   // Chatbot Page
-                  ChatbotsPage(),
+                  const ChatbotsPage(),
                 ],
               ),
             ),

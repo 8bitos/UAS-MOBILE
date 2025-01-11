@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:uas_cookedex/screens/e-mail_login_screen.dart';
-import 'auth_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uas_cookedex/home/home.dart';
 
@@ -149,10 +148,14 @@ class _SplashScreenState extends State<SplashScreen> {
                 );
               },
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8), // Adds padding around the text
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8), // Adds padding around the text
                 decoration: BoxDecoration(
-                  color: Colors.orangeAccent, // Background color of the bold styling
-                  borderRadius: BorderRadius.circular(8), // Makes the edges rounded for a softer look
+                  color: Colors
+                      .orangeAccent, // Background color of the bold styling
+                  borderRadius: BorderRadius.circular(
+                      8), // Makes the edges rounded for a softer look
                 ),
                 child: const Text(
                   "Skip",
@@ -193,9 +196,11 @@ class _SplashScreenState extends State<SplashScreen> {
           // Get Started Button (Last Page Only)
           if (_currentPage == splashData.length - 1)
             Align(
-              alignment: Alignment.bottomCenter, // Center horizontally and align to the bottom
+              alignment: Alignment
+                  .bottomCenter, // Center horizontally and align to the bottom
               child: Padding(
-                padding: const EdgeInsets.only(bottom: 40), // Add space from the bottom
+                padding: const EdgeInsets.only(
+                    bottom: 40), // Add space from the bottom
                 child: ElevatedButton(
                   onPressed: () {
                     Navigator.pushReplacement(

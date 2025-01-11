@@ -4,15 +4,15 @@ import '../provider/notification_service.dart';
 class UserProvider with ChangeNotifier {
   String _name = "Nararaya Kirana";
   String _bio = "Rajin menabung dan suka memasak";
-  String _profileImage = "assets/images/profile.png";
+  final String _profileImage = "assets/images/profile.png";
 
   // Data for cookbooks and recipes
-  List<Map<String, dynamic>> _userCookbooks = [];
-  List<Map<String, dynamic>> _userRecipes = [];
+  final List<Map<String, dynamic>> _userCookbooks = [];
+  final List<Map<String, dynamic>> _userRecipes = [];
 
   // Tambahkan data untuk reviews dan notifications
-  List<Map<String, dynamic>> _userReviews = [];
-  List<Map<String, dynamic>> _notifications = [];
+  final List<Map<String, dynamic>> _userReviews = [];
+  final List<Map<String, dynamic>> _notifications = [];
 
   // Getters
   String get name => _name;

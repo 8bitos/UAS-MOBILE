@@ -2,11 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:uas_cookedex/screens/auth_screen.dart';
 import 'package:uas_cookedex/home/home.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uas_cookedex/services/auth_service.dart';
 import 'forgot_pass_screen.dart';
 import 'package:flutter/gestures.dart';
-
 
 class EmailLoginScreen extends StatefulWidget {
   const EmailLoginScreen({super.key});
@@ -152,7 +150,7 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
                                   const ForgotPasswordScreen()),
                         );
                       },
-                      child: Text(
+                      child: const Text(
                         'forgot password',
                         style: TextStyle(color: Colors.grey),
                       ),
@@ -186,13 +184,16 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
                   RichText(
                     text: TextSpan(
                       text: "Haven't made an account? ",
-                      style: const TextStyle(color: Colors.grey), // Non-clickable part
+                      style: const TextStyle(
+                          color: Colors.grey), // Non-clickable part
                       children: [
                         TextSpan(
                           text: "Register here",
                           style: const TextStyle(
-                            color: Colors.orangeAccent, // Color for the clickable text
-                            fontWeight: FontWeight.bold, // Optional styling for emphasis
+                            color: Colors
+                                .orangeAccent, // Color for the clickable text
+                            fontWeight: FontWeight
+                                .bold, // Optional styling for emphasis
                           ),
                           recognizer: TapGestureRecognizer()
                             ..onTap = () {
@@ -206,7 +207,7 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
                         ),
                       ],
                     ),
-                  ),          
+                  ),
                 ],
               ),
             ),
