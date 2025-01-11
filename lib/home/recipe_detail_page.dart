@@ -1,16 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:uas_cookedex/services/recipe_service.dart';
-<<<<<<< HEAD
-import 'package:uas_cookedex/services/image_search_service.dart'; // Import the image search service
-=======
 import 'package:uas_cookedex/services/auth_service.dart';
 import 'package:uas_cookedex/services/image_search_service.dart';
->>>>>>> feature/ui
 
 class RecipeDetailPage extends StatefulWidget {
   final dynamic recipe;
 
-  const RecipeDetailPage({super.key, required this.recipe});
+  RecipeDetailPage({required this.recipe});
 
   @override
   _RecipeDetailPageState createState() => _RecipeDetailPageState();
@@ -18,6 +14,7 @@ class RecipeDetailPage extends StatefulWidget {
 
 class _RecipeDetailPageState extends State<RecipeDetailPage> {
   final RecipeService _recipeService = RecipeService();
+  final AuthService _authService = AuthService();
   final ImageSearchService _imageSearchService = ImageSearchService();
   bool _showReviews = false;
   List<dynamic> _comments = [];
@@ -32,7 +29,8 @@ class _RecipeDetailPageState extends State<RecipeDetailPage> {
   }
 
   Future<void> _fetchImage() async {
-    final imageUrl = await _imageSearchService.fetchImageBasedOnTitle(widget.recipe['title']);
+    final imageUrl = await _imageSearchService
+        .fetchImageBasedOnTitle(widget.recipe['title']);
     setState(() {
       _imageUrl = imageUrl;
     });
@@ -115,7 +113,8 @@ class _RecipeDetailPageState extends State<RecipeDetailPage> {
   }
 
   void _showErrorSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
@@ -131,7 +130,11 @@ class _RecipeDetailPageState extends State<RecipeDetailPage> {
     }
 
     // Calculate scaling factor based on screen width
-    double scaleFactor = screenWidth < 360 ? 0.8 : screenWidth > 600 ? 1.2 : 1.0;
+    double scaleFactor = screenWidth < 360
+        ? 0.8
+        : screenWidth > 600
+            ? 1.2
+            : 1.0;
 
     return Scaffold(
       body: CustomScrollView(
@@ -155,24 +158,6 @@ class _RecipeDetailPageState extends State<RecipeDetailPage> {
                         ),
                       ),
                     ),
-<<<<<<< HEAD
-              const SizedBox(height: 16),
-              Text(
-                recipe['title'] ?? 'Untitled Recipe',
-                style:
-                    const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'By: ${recipe['user']['name'] ?? 'Unknown'}',
-                style: const TextStyle(fontSize: 16, color: Colors.grey),
-              ),
-              const SizedBox(height: 16),
-              Text(recipe['description'] ?? 'No description available.'),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-=======
             ),
           ),
           // Konten
@@ -181,7 +166,6 @@ class _RecipeDetailPageState extends State<RecipeDetailPage> {
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
->>>>>>> feature/ui
                 children: [
                   // Title dan Like/Save berada di atas Deskripsi
                   Text(
@@ -193,7 +177,8 @@ class _RecipeDetailPageState extends State<RecipeDetailPage> {
                   ),
                   SizedBox(height: 8),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.start, // Agar Like/Save berada di kiri
+                    mainAxisAlignment: MainAxisAlignment
+                        .start, // Agar Like/Save berada di kiri
                     children: [
                       // Like button
                       IconButton(
@@ -203,7 +188,8 @@ class _RecipeDetailPageState extends State<RecipeDetailPage> {
                         ),
                         onPressed: () => _toggleLike(recipe['id'], isLiked),
                       ),
-                      Text('${recipe['likes_count']} Likes', style: TextStyle(fontSize: 14 * scaleFactor)),
+                      Text('${recipe['likes_count']} Likes',
+                          style: TextStyle(fontSize: 14 * scaleFactor)),
                       // Save button
                       IconButton(
                         icon: Icon(
@@ -212,50 +198,10 @@ class _RecipeDetailPageState extends State<RecipeDetailPage> {
                         ),
                         onPressed: () => _toggleSave(recipe['id'], isSaved),
                       ),
-                      Text('${recipe['saved_by_count']} Saves', style: TextStyle(fontSize: 14 * scaleFactor)),
+                      Text('${recipe['saved_by_count']} Saves',
+                          style: TextStyle(fontSize: 14 * scaleFactor)),
                     ],
                   ),
-<<<<<<< HEAD
-                  Text('${recipe['saved_by_count']} Saves'),
-                ],
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () {
-                  if (!_showReviews) _fetchComments();
-                  setState(() {
-                    _showReviews = !_showReviews;
-                  });
-                },
-                child: Text(_showReviews ? 'Hide Reviews' : 'Show Reviews'),
-              ),
-              if (_showReviews) ...[
-                const SizedBox(height: 16),
-                _isLoadingComments
-                    ? const Center(child: CircularProgressIndicator())
-                    : Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          ..._comments.map((comment) => ListTile(
-                                title: Text(comment['content'] ?? ''),
-                                subtitle: Text(
-                                    'By: ${comment['user']['name'] ?? 'Unknown'}'),
-                                trailing: IconButton(
-                                  icon: const Icon(Icons.delete),
-                                  onPressed: () async {
-                                    // Add delete comment logic if needed
-                                  },
-                                ),
-                              )),
-                          TextField(
-                            controller: _commentController,
-                            decoration: InputDecoration(
-                              labelText: 'Add a comment',
-                              border: const OutlineInputBorder(),
-                              suffixIcon: IconButton(
-                                icon: const Icon(Icons.send),
-                                onPressed: _addComment,
-=======
                   SizedBox(height: 16),
                   // TabBar untuk Intro, Ingredients, dan Steps
                   DefaultTabController(
@@ -281,16 +227,17 @@ class _RecipeDetailPageState extends State<RecipeDetailPage> {
                               SingleChildScrollView(
                                 padding: const EdgeInsets.all(8.0),
                                 child: Text(
-                                  recipe['description'] ?? 'No description available.',
+                                  recipe['description'] ??
+                                      'No description available.',
                                   style: TextStyle(fontSize: 16 * scaleFactor),
                                 ),
->>>>>>> feature/ui
                               ),
                               // Ingredients Tab
                               SingleChildScrollView(
                                 padding: const EdgeInsets.all(8.0),
                                 child: Text(
-                                  formatText(recipe['ingredients'] ?? 'No ingredients available.'),
+                                  formatText(recipe['ingredients'] ??
+                                      'No ingredients available.'),
                                   style: TextStyle(fontSize: 16 * scaleFactor),
                                 ),
                               ),
@@ -298,7 +245,8 @@ class _RecipeDetailPageState extends State<RecipeDetailPage> {
                               SingleChildScrollView(
                                 padding: const EdgeInsets.all(8.0),
                                 child: Text(
-                                  formatText(recipe['steps'] ?? 'No steps available.'),
+                                  formatText(
+                                      recipe['steps'] ?? 'No steps available.'),
                                   style: TextStyle(fontSize: 16 * scaleFactor),
                                 ),
                               ),
@@ -339,7 +287,9 @@ class _RecipeDetailPageState extends State<RecipeDetailPage> {
                                 },
                                 child: Text(
                                   'Read All',
-                                  style: TextStyle(color: Colors.orangeAccent, fontSize: 14 * scaleFactor),
+                                  style: TextStyle(
+                                      color: Colors.orangeAccent,
+                                      fontSize: 14 * scaleFactor),
                                 ),
                               ),
                             ],
@@ -350,38 +300,50 @@ class _RecipeDetailPageState extends State<RecipeDetailPage> {
                                 : Column(
                                     children: [
                                       ..._comments.map((comment) => Padding(
-                                            padding: const EdgeInsets.only(bottom: 8.0),
+                                            padding: const EdgeInsets.only(
+                                                bottom: 8.0),
                                             child: Card(
                                               shape: RoundedRectangleBorder(
-                                                borderRadius: BorderRadius.circular(8),
+                                                borderRadius:
+                                                    BorderRadius.circular(8),
                                               ),
                                               elevation: 2,
                                               child: Padding(
-                                                padding: const EdgeInsets.all(12.0),
+                                                padding:
+                                                    const EdgeInsets.all(12.0),
                                                 child: Column(
-                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
                                                   children: [
                                                     Text(
-                                                      comment['user']['name'] ?? 'Anonymous',
+                                                      comment['user']['name'] ??
+                                                          'Anonymous',
                                                       style: TextStyle(
-                                                        fontWeight: FontWeight.bold,
-                                                        fontSize: 16 * scaleFactor,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        fontSize:
+                                                            16 * scaleFactor,
                                                       ),
                                                     ),
                                                     SizedBox(height: 4),
                                                     Text(
                                                       comment['content'] ?? '',
                                                       style: TextStyle(
-                                                        fontSize: 14 * scaleFactor,
+                                                        fontSize:
+                                                            14 * scaleFactor,
                                                         color: Colors.grey,
                                                       ),
                                                     ),
                                                     Align(
-                                                      alignment: Alignment.topRight,
+                                                      alignment:
+                                                          Alignment.topRight,
                                                       child: IconButton(
-                                                        icon: Icon(Icons.delete, color: Colors.orangeAccent),
+                                                        icon: Icon(Icons.delete,
+                                                            color: Colors
+                                                                .orangeAccent),
                                                         onPressed: () {
-                                                          _deleteComment(comment['id']);
+                                                          _deleteComment(
+                                                              comment['id']);
                                                         },
                                                       ),
                                                     ),
