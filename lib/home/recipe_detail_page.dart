@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:uas_cookedex/services/recipe_service.dart';
-import 'package:uas_cookedex/services/auth_service.dart';
 import 'package:uas_cookedex/services/image_search_service.dart';
 
 class RecipeDetailPage extends StatefulWidget {
@@ -14,7 +13,6 @@ class RecipeDetailPage extends StatefulWidget {
 
 class _RecipeDetailPageState extends State<RecipeDetailPage> {
   final RecipeService _recipeService = RecipeService();
-  final AuthService _authService = AuthService();
   final ImageSearchService _imageSearchService = ImageSearchService();
   bool _showReviews = false;
   List<dynamic> _comments = [];
